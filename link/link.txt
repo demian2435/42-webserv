@@ -1,0 +1,11 @@
+SOCKET
+https://www.bogotobogo.com/cplusplus/sockets_server_client.php
+https://www.geeksforgeeks.org/tcp-and-udp-server-using-select/
+
+
+TCP
+https://www.geeksforgeeks.org/socket-programming-cc/
+
+
+NETWORK
+https://teoriadeisegnali.it/appint/html/Text/1_network_programming2.html
