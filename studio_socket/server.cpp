@@ -6,6 +6,10 @@
 #include <string>
 #define PORT 8080
 #define BUFFER_SIZE 20000
+#define MAX_CONNECTIONS 999
+/* COLORS */
+#define	GREEN "\033[0;32m"
+#define OFF "\033[0m"
 
 int main(void)
 {
@@ -49,14 +53,14 @@ int main(void)
 	//lo zero dovrebbe essere una rappresentazione numerica del protocollo
 	//indagare sul perchè sia proprio zero
 	if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
-		exit(1);
+		return(1);
 	
 	//This helps in manipulating options for the socket referred by the file descriptor sockfd. 
 	//This is completely optional, but it helps in reuse of address and port.
 	//Prevents error such as: “address already in use”.
 	//int setsockopt(int sockfd, int level, int optname, const void *optval, socklen_t optlen);
 	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)))
-		exit(1);
+		return(1);
 	
 	//set sin_family to IPV4
 	address.sin_family = AF_INET;
@@ -67,12 +71,13 @@ int main(void)
 	
 	//binds the socket to the address localhost
 	if (bind(server_fd, (struct sockaddr *)&address, sizeof(address))<0)
-		exit(1);
+		return(1);
 
 	while(1)
 	{
-		if (listen(server_fd, 3) < 0)
-			exit(1);
+		std::cout << GREEN << "SERVER IN ASCOLTO" << OFF << std::endl;
+		if (listen(server_fd, MAX_CONNECTIONS) < 0)
+			return(1);
 
 		/*
 		Await a connection on socket FD.
@@ -82,7 +87,7 @@ int main(void)
 		new socket's descriptor, or -1 for errors.
 		*/
 		if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0)
-			exit(1);
+			return(1);
 
 		//read buffer with client message
 		valread = read( new_socket , buffer, BUFFER_SIZE);
@@ -92,7 +97,7 @@ int main(void)
 
 		//send the response
 		send(new_socket , hello.c_str() , hello.length() , 0 );
-		std::cout << "Messaggio inviato al client\n" << hello << std::endl;
+		std::cout << "Messaggio inviato al client\n" << std::endl;
 
 		//it cleans the buffer to take a new message
 		for (int i = 0; i < BUFFER_SIZE; i++)
