@@ -11,7 +11,6 @@ int main(int argc, char **argv)
 	int valread = 0;
 	struct sockaddr_in serv_addr;
 	std::string hello;
-	std::cout << argv[1] << std::endl;
 	if (argc == 2)
 		hello = std::string(argv[1]);
 	else

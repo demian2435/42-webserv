@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <stdio.h>
 #include <iostream>
 #include <sys/socket.h>
 #include <stdlib.h>
@@ -7,7 +8,7 @@
 #include <fcntl.h>
 #include <arpa/inet.h>
 #define PORT 8080
-#define BUFFER_SIZE 5
+#define BUFFER_SIZE 1024
 #define MAX_CONNECTIONS 999
 /* COLORS */
 #define	GREEN "\033[0;32m"
@@ -64,7 +65,6 @@ int main(void)
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_addr.s_addr = INADDR_ANY;
 	serverAddr.sin_port = htons(PORT);
-	//std::memset(&(serverAddr.sin_zero), '\0', 8);
 	if (bind(listener, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) == -1) {
 		std::cout << "ERRORE BIND" << std::endl;
 		return (1);
@@ -82,6 +82,7 @@ int main(void)
 	fdTot = listener;
 
 	//---------------MAIN LOOP----------------//
+	std::cout << GREEN << "SERVER ATTIVO" << OFF << std::endl;
 	while (true)
 	{
 		// Copiamo il set di base dentro al set degli fd in arrivo cosi da vedere se il numero è maggiore di 1
@@ -143,7 +144,7 @@ int main(void)
 									std::cout << std::endl;
 
 									// Mandiamo la risposta al client
-									if (send(j, "RISPOSTA DEL SERVER", 20, 0) == -1) {
+									if (send(j, "RISPOSTA DEL SERVER\n", 21, 0) == -1) {
 										std::cout << "ERRORE SEND" << std::endl;
 									}
 								}

@@ -118,6 +118,10 @@ run			:	all
 				@./$(NAME_C) "TEST 2"
 				@./$(NAME_C) "TEST 3"
 				@./$(NAME_C) "ULTIMO TEST"
+
+runTelnet	:	all
+				@gnome-terminal -- ./$(NAME_S)
+				@telnet localhost 8080
 else
 run			:	all
 				@echo "IMPOSTARE CONSOLE MAC"
