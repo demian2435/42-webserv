@@ -40,6 +40,14 @@ int main(void)
 	int nbytes;
 	// Variabile per impostare il setsockopt
 	int yes = 1;
+	// Risposta standard del server
+	std::string hello = "HTTP/1.1 200 OK\n"
+						"Content-Length: 34\n"
+						"Content-Type: text/html\n"
+						"Connection: Closed\n"
+						"\n<html>"
+							"<h1>Hello world!</h1>"
+						"</html>\n";
 
 	//----------------------PREPARAZIONE----------------------------//
 
@@ -144,7 +152,7 @@ int main(void)
 									std::cout << std::endl;
 
 									// Mandiamo la risposta al client
-									if (send(j, "RISPOSTA DEL SERVER\n", 21, 0) == -1) {
+									if (send(j, hello.c_str(), hello.length(), 0) == -1) {
 										std::cout << "ERRORE SEND" << std::endl;
 									}
 								}

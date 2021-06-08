@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+         #
+#    By: aduregon <aduregon@42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/04/23 11:15:19 by dmalori           #+#    #+#              #
-#    Updated: 2021/06/03 16:11:18 by dmalori          ###   ########.fr        #
+#    Updated: 2021/06/08 17:34:18 by aduregon         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -124,7 +124,8 @@ runTelnet	:	all
 				@telnet localhost 8080
 else
 run			:	all
-				@echo "IMPOSTARE CONSOLE MAC"
+				@osascript -e 'tell application "Terminal" to do script "cd Desktop;cd 42-webserv;cd studio_socket;./s"' $(NAME_S)
+				@open http://localhost:8080
 endif
 
 .phony		:	all re clean fclean run
