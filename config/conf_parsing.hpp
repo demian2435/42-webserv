@@ -6,11 +6,29 @@
 /*   By: forsili <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/07 09:43:52 by forsili           #+#    #+#             */
-/*   Updated: 2021/06/08 22:35:52 by forsili          ###   ########.fr       */
+/*   Updated: 2021/06/08 23:07:34 by forsili          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
+
+#define RESET   "\033[0m"
+#define BLACK   "\033[30m"      /* Black */
+#define RED     "\033[31m"      /* Red */
+#define GREEN   "\033[32m"      /* Green */
+#define YELLOW  "\033[33m"      /* Yellow */
+#define BLUE    "\033[34m"      /* Blue */
+#define MAGENTA "\033[35m"      /* Magenta */
+#define CYAN    "\033[36m"      /* Cyan */
+#define WHITE   "\033[37m"      /* White */
+#define BOLDBLACK   "\033[1m\033[30m"      /* Bold Black */
+#define BOLDRED     "\033[1m\033[31m"      /* Bold Red */
+#define BOLDGREEN   "\033[1m\033[32m"      /* Bold Green */
+#define BOLDYELLOW  "\033[1m\033[33m"      /* Bold Yellow */
+#define BOLDBLUE    "\033[1m\033[34m"      /* Bold Blue */
+#define BOLDMAGENTA "\033[1m\033[35m"      /* Bold Magenta */
+#define BOLDCYAN    "\033[1m\033[36m"      /* Bold Cyan */
+#define BOLDWHITE   "\033[1m\033[37m"      /* Bold White */
 
 #include <string>
 #include <iostream>
@@ -184,12 +202,12 @@ class   location{
                 tmp = (char *)(buff.c_str());
                 tmp = ft_strtrim(&tmp, " ", 0);
                 argv = ft_split(tmp, ' ');
-                if (argv[0][0] == '#')
+                if (matrix_len(argv) == 0 || (!strcmp(argv[0], "#")))
                 {
                     line++;
                     continue;
                 }
-                if (argv[0][0] == '}')
+                if (!strcmp(argv[0], "}"))
                 {
                     line++;
                     break;
@@ -197,14 +215,14 @@ class   location{
                 if (!strcmp(argv[0], "root") && strlen(argv[0]) == strlen("root"))
                 {
                     if (matrix_len(argv) != 2)
-                        std::cout << "Error: invalid root line: " << line << "\n";
+                        std::cout << RED << "Error: invalid root line: " << line << "\n" << RESET;
                     else
                     {
-                        std::cout << argv[1] << "\n";
                         argv[1] = ft_strtrim(&argv[1], ";", 1);
                         std::string str(argv[1]);
                         this->root = str;
                     }
+                    line++;
                 }
                 else if (!strcmp(argv[0], "index") && strlen(argv[0]) == strlen("index"))
                 {
@@ -213,6 +231,7 @@ class   location{
                         argv[1] = ft_strtrim(&argv[1], ";", 1);
                         this->index.push_back(std::string(argv[k]));
                     }
+                    line++;
                 }
                 //else if (!strcmp(argv[0], "method") && strlen(argv[0]) == strlen("method"))
                 //{
@@ -225,27 +244,29 @@ class   location{
                 else if (!strcmp(argv[0], "cgi_path") && strlen(argv[0]) == strlen("cgi_path"))
                 {
                     if (matrix_len(argv) != 2)
-                        std::cout << "Error: invalid CGI path at line: " << line << "\n";
+                        std::cout << RED <<"Error: invalid CGI path at line: " << line << "\n" << RESET;
                     else
                     {
                         argv[1] = ft_strtrim(&argv[1], ";", 1);
                         this->cgi_path = std::string(argv[1]);
                     }
+                    line++;
                 }
                 else if (!strcmp(argv[0], "cgi_extension") && strlen(argv[0]) == strlen("cgi_extension"))
                 {
                     if (matrix_len(argv) != 2)
-                        std::cout << "Error: invalid CGI extension at line: " << line << "\n";
+                        std::cout << RED << "Error: invalid CGI extension at line: " << line << "\n" <<RESET;
                     else
                     {
                         argv[1] = ft_strtrim(&argv[1], ";", 1);
                         this->cgi_extention = std::string(argv[1]);
                     }
+                    line++;
                 }
                 else if (!strcmp(argv[0], "autoindex") && strlen(argv[0]) == strlen("autoindex"))
                 {
                     if (matrix_len(argv) != 2)
-                        std::cout << "Warning: autoindex mode on false by default at line: " << line << "\n";
+                        std::cout << YELLOW << "Warning: autoindex mode on false by default at line: " << line << "\n" << RESET;
                     else
                     {
                         argv[1] = ft_strtrim(&argv[1], ";", 1);
@@ -255,23 +276,26 @@ class   location{
                             this->autoindex = true;
 
                     }
+                    line++;
                 }
                 else if (!strcmp(argv[0], "client_max_body_size") && strlen(argv[0]) == strlen("client_max_body_size"))
                 {
+                    argv[1] = ft_strtrim(&argv[1], ";", 1);
                     if (matrix_len(argv) != 2 || !ft_isdigit(argv[1]))
-                        std::cout << "Warning: invalid max body size, setted as default, at line: " << line << "\n";
+                        std::cout << YELLOW <<"Warning: invalid max body size, setted as default, at line: " << line << "\n" << RESET;
                     else
                     {
-                        argv[1] = ft_strtrim(&argv[1], ";", 1);
                         this->client_max_body_size = size_t(atoi(argv[1]));
                     }
+                    line++;
                 }
-                else
+                else if (argv)
                 {
-                    std::cout << "Warning: cannot read line " << line << " in location path " << this->path;
-                    std::cout << " command " << argv[0] << " not supported\n";           
+                    argv[0] = ft_strtrim(&argv[0], " ", 1);
+                    std::cout << YELLOW <<"Warning: cannot read line " << line << " in location path " << this->path;
+                    std::cout << " command " << argv[0] << " not supported\n" <<RESET;           
+                    line++;
                 }
-                line++;
             }
         }
 
@@ -423,12 +447,11 @@ class   config{
             return (1);
         }
 
-        void    parse(std::ifstream &myfile)
+        void    parse(std::ifstream &myfile, int &line)
         {
             std::string buff;
             char **argv;
             char *tmp = NULL;
-            int line = 0;
             int i = 0;
             errorPages  errorP;
             while (getline(myfile,buff))
@@ -436,12 +459,12 @@ class   config{
                 tmp = (char *)(buff.c_str());
                 tmp = ft_strtrim(&tmp, " ", 0);
                 argv = ft_split(tmp, ' ');
-                if (matrix_len(argv) == 0 || (!strcmp(argv[0], "#") && strlen(argv[0]) == strlen("#")))
+                if (matrix_len(argv) == 0 || !strcmp(argv[0], "#"))
                 {
                     line++;
                     continue;
                 }
-                if (!strcmp(argv[0], "}") && strlen(argv[0]) == strlen("}"))
+                if (!strcmp(argv[0], "}"))
                 {
                     line++;
                     break;
@@ -463,6 +486,7 @@ class   config{
                             i++;
                         }
                     }
+                    line++;
                 }
                 else if (!strcmp(argv[0], "server_name") && strlen(argv[0]) == strlen("server_name"))
                 {
@@ -473,6 +497,7 @@ class   config{
                         argv[1] = argv[1] = ft_strtrim(&argv[1], ";", 1);
                         this->name = std::string(argv[1]);
                     }
+                    line++;
                 }                
                 else if (!strcmp(argv[0], "error_page") && strlen(argv[0]) == strlen("error_page"))                
                 {
@@ -484,7 +509,7 @@ class   config{
                         else
                             std::cout << "Warning: invalid not numbered error, ignoring at line: " << line << "\n";
                     }
-                    
+                    line++;
                 }
                 else if (!strcmp(argv[0], "location") && strlen(argv[0]) == strlen("location"))                
                 {
@@ -492,6 +517,7 @@ class   config{
                         std::cout << "Error: syntax not valid for location in line: " << line << "\n";
                     else {
                         std::string path_location(argv[1]);
+                        line++;
                         location    loc(path_location, myfile, line);
                         this->locations.push_back(loc);
                     }
@@ -500,9 +526,9 @@ class   config{
                 {
                     std::cout << "Warning: cannot read line " << line;
                     std::cout << " command " << argv[0] << " not supported\n";           
+                    line++;
                 }
                 //std::cout << line << std::endl;
-                line++;
             }
             this->error_pages = errorP;
         }        
@@ -510,13 +536,36 @@ class   config{
         config()
         {
             std::string path = "./config/webserv.conf";
-            std::string line;
             std::string buffer;
             std::ifstream myfile(path);
+            char    *tmp;
+            char    **argv;
+            int     line = 1;
             if (myfile.is_open())
-                parse(myfile);
+            {
+                while (getline(myfile,buffer))
+                {
+                    tmp = (char *)(buffer.c_str());
+                    tmp = ft_strtrim(&tmp, " ", 0);
+                    argv = ft_split(tmp, ' ');
+                    if (matrix_len(argv) == 0 || (!strcmp(argv[0], "#") && strlen(argv[0]) == strlen("#")))
+                    {
+                        line++;
+                        continue;
+                    }
+                    if (!strcmp(argv[0], "}") && strlen(argv[0]) == strlen("}"))
+                    {
+                        line++;
+                        break;
+                    }
+                    if (!strcmp(argv[0], "server") && strlen(argv[0]) == strlen("server"))
+                    {
+                        line++;
+                        parse(myfile, line);
+                    }            
+                }
+            }
             else
                 std::cerr << "Error: can't open config file\n";
-            std::cout << buffer;
         }   
 };

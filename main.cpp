@@ -7,10 +7,11 @@ int main()
     std::cout << info.name << std::endl;
     std::cout << info.host << std::endl;
     std::cout << info.port << std::endl;
+    std::cout << "error pages:" << std::endl;
     for (size_t i = 0; i < 700; i++)
     {
         if (info.error_pages.getPath(i) != "")
-            std::cout << i << " " << info.error_pages.getPath(i) << std::endl;
+            std::cout << "  " << i << " " << info.error_pages.getPath(i) << std::endl;
     }
     std::list<location>::iterator    it(info.locations.begin());
     std::list<std::string>::iterator   it2;
