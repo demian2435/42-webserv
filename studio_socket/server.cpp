@@ -1,40 +1,46 @@
 #include <unistd.h>
+#include <stdio.h>
 #include <iostream>
 #include <sys/socket.h>
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <string>
+#include <fcntl.h>
+#include <arpa/inet.h>
 #define PORT 8080
-#define BUFFER_SIZE 20000
+#define BUFFER_SIZE 1024
+#define MAX_CONNECTIONS 999
+/* COLORS */
+#define	GREEN "\033[0;32m"
+#define OFF "\033[0m"
 
 int main(void)
 {
-	//server's file descriptor in witch the clients will write requests
-	int server_fd;
+	//---------------VARIABILI----------------//
 
-	//the temp socket created to catch a client request and respond
-	int new_socket;
-
-	//used to take response from the read function in the while loop, seems to be unused
-	int valread;
-
-	//socket address configuration
-	struct sockaddr_in address;
-
-	//used in the function setsockopt, but not sure about the use
-	int opt = 1;
-
-	//size of address, not sure of why is using a variable to store it
-	int addrlen = sizeof(address);
-
-	//buffer di lettura
-	char buffer[BUFFER_SIZE];
-
-	//azzera il buffer statico, gli array statici sono inizializzati a 0, pe ril momento commentato
-		//for (int i = 0; i < BUFFER_SIZE; i++)
-		//	buffer[i] = 0;
-
-	//hello world response
+	// Contenitore per i file descriptor che arriveranno
+	fd_set temp_fd;
+	// Contenitore di backup, cosi da controllare le differenze nel tempo
+	fd_set base_fd;
+	// Server address
+	struct sockaddr_in serverAddr;
+	// Client address
+	struct sockaddr_in clientAddr;
+	// Totale fd aperti al momento
+	int fdTot;
+	// Fd del listener
+	int listener;
+	// Nuovo fd accettato dal listner
+	int newfd;
+	// Variabile che contiene il size dell'address in arrivo 
+	socklen_t addrlen;
+	// Buffer data
+	char buff[BUFFER_SIZE];
+	// Lughezza buffer data
+	int nbytes;
+	// Variabile per impostare il setsockopt
+	int yes = 1;
+	// Risposta standard del server
 	std::string hello = "HTTP/1.1 200 OK\n"
 						"Content-Length: 34\n"
 						"Content-Type: text/html\n"
@@ -42,64 +48,120 @@ int main(void)
 						"\n<html>"
 							"<h1>Hello world!</h1>"
 						"</html>\n";
-	
-	//creazione dell' fd attraverso la funzione socket
-	//AF_INET indica l'uso del protocollo ipv4
-	//SOCK_STREAM indica l'uso del protocollo TCP
-	//lo zero dovrebbe essere una rappresentazione numerica del protocollo
-	//indagare sul perchè sia proprio zero
-	if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
-		exit(1);
-	
-	//This helps in manipulating options for the socket referred by the file descriptor sockfd. 
-	//This is completely optional, but it helps in reuse of address and port.
-	//Prevents error such as: “address already in use”.
-	//int setsockopt(int sockfd, int level, int optname, const void *optval, socklen_t optlen);
-	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)))
-		exit(1);
-	
-	//set sin_family to IPV4
-	address.sin_family = AF_INET;
-	//set address to localhost
-	address.sin_addr.s_addr = INADDR_ANY;
-	//set the listening port
-	address.sin_port = htons( PORT );
-	
-	//binds the socket to the address localhost
-	if (bind(server_fd, (struct sockaddr *)&address, sizeof(address))<0)
-		exit(1);
 
-	while(1)
-	{
-		if (listen(server_fd, 3) < 0)
-			exit(1);
+	//----------------------PREPARAZIONE----------------------------//
 
-		/*
-		Await a connection on socket FD.
-		When a connection arrives, open a new socket to communicate with it,
-		set *ADDR (which is *ADDR_LEN bytes long) to the address of the connecting
-		peer and *ADDR_LEN to the address's actual length, and return the
-		new socket's descriptor, or -1 for errors.
-		*/
-		if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0)
-			exit(1);
+	// Azzeriamo i set
+	FD_ZERO(&temp_fd);
+	FD_ZERO(&base_fd);
 
-		//read buffer with client message
-		valread = read( new_socket , buffer, BUFFER_SIZE);
-		std::cout << "Messaggio in arrivo dal client: " << buffer << std::endl;
-
-		//QUI ANDREBBE L'ELABORAZIONE DELLA RICHIESTA
-
-		//send the response
-		send(new_socket , hello.c_str() , hello.length() , 0 );
-		std::cout << "Messaggio inviato al client\n" << hello << std::endl;
-
-		//it cleans the buffer to take a new message
-		for (int i = 0; i < BUFFER_SIZE; i++)
-			buffer[i] = 0;
-
-		//close connection with requesting client
-		close(new_socket);
+	// Generiamo l'FD per il listener
+	if ((listener = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+		std::cout << "ERRORE SOCKET" << std::endl;
+		return (1);
 	}
-	return 0;
+	// Settiamo il socket come NONBLOCK
+	fcntl(listener, F_SETFL, O_NONBLOCK);
+
+	// Impostiamo che il socket puo riutilizzare gli address
+	if (setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
+		std::cout << "ERRORE SETSOCKOPT" << std::endl;
+		return (1);
+	}
+
+	// Colleghiamo il listener alla porta selezionata
+	serverAddr.sin_family = AF_INET;
+	serverAddr.sin_addr.s_addr = INADDR_ANY;
+	serverAddr.sin_port = htons(PORT);
+	if (bind(listener, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) == -1) {
+		std::cout << "ERRORE BIND" << std::endl;
+		return (1);
+	}
+
+  	// Prepariamo il listener a ricevere connessioni
+	if (listen(listener, MAX_CONNECTIONS) == -1) {
+		std::cout << "ERRORE LISTEN" << std::endl;
+		return (1);
+	}
+
+ 	// Aggiungiamo il listener al set di base
+ 	FD_SET(listener, &base_fd);
+	// Inizializziamo l'fdTot
+	fdTot = listener;
+
+	//---------------MAIN LOOP----------------//
+	std::cout << GREEN << "SERVER ATTIVO" << OFF << std::endl;
+	while (true)
+	{
+		// Copiamo il set di base dentro al set degli fd in arrivo cosi da vedere se il numero è maggiore di 1
+		// il che significherà che ci sono client in attesa
+		temp_fd = base_fd;
+		// Selezioniamo il primo client che ci ha chiamati (ovviamente sarà l'index 1 poichè allo 0 c'è il server)
+		if (select(fdTot+1, &temp_fd, NULL, NULL, NULL) == -1) {
+			std::cout << "ERRORE SELECT" << std::endl;
+			return (1);
+		}
+		// Andiamo a interagire con tutti i client che ci hanno contattato
+		for (int i = 0; i <= fdTot; i++) {
+			// Andiamo a controllare se è un FD valido l'index i del set
+			if (FD_ISSET(i, &temp_fd)) {
+				// Se server generiamo la connessione con il client in attesa
+				if (i == listener) {
+					// Salviamo la grandezza dell'address del client
+					addrlen = sizeof(clientAddr);
+					// Acettiamo la conessione generando un nuovo FD
+					if ((newfd = accept(listener, (struct sockaddr *)&clientAddr, &addrlen)) == -1) {
+               			std::cout << "ERRORE ACCEPT" << std::endl;
+             		} else {
+						// Inseriamo il nuovo FD nella lista base
+						FD_SET(newfd, &base_fd);
+						// Aggiorniamo il totale di FD aperti
+						if (newfd > fdTot) {
+                 			fdTot = newfd;
+               			}
+						std::cout << "Nuova connessione da " << inet_ntoa(clientAddr.sin_addr) << " sul socket " << newfd << std::endl;
+					}
+				}
+				else // Se Client adiamo a connetterci con i client 
+				{
+					// Leggiamo il buffer inviatoci dal client (In caso 0 o -1 chiudiamo la connessione)
+					if ((nbytes = recv(i, buff, sizeof(buff), 0)) <= 0) {
+						// Conessione chiusa dal client se 0 size
+						if (nbytes == 0) {
+							std::cout << "Connessione chiusa da socket " << newfd << std::endl;
+						} else {
+							std::cout << "ERRORE RECV" << std::endl;
+						}
+						// Chiudiamo la connessione
+						close (i);
+						// Eliminiamo l'FD dal set base
+						FD_CLR(i, &base_fd); 
+					}
+					else // Il server risponde ai Client
+					{
+						// Controlliamo se ci sono Client che attendono una risposta
+						for(int j = 0; j <= fdTot; j++) {
+							// Controlliamo se è presente nella lista delle consseioni accettate
+							if (FD_ISSET(j, &base_fd)) {
+								// Bypassiamo il server
+								if (j != listener) {
+									// Stampiamo il buffer del client
+									std::cout << "Messaggio del client " << j << ": ";
+									for (int k = 0; k < nbytes; k++)
+										std::cout << buff[k];
+									std::cout << std::endl;
+
+									// Mandiamo la risposta al client
+									if (send(j, hello.c_str(), hello.length(), 0) == -1) {
+										std::cout << "ERRORE SEND" << std::endl;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return (0);
 }
