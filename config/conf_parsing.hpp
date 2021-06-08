@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   conf_parsing.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: forsili <forsili@student.42.fr>            +#+  +:+       +#+        */
+/*   By: forsili <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/07 09:43:52 by forsili           #+#    #+#             */
-/*   Updated: 2021/06/07 11:43:45 by forsili          ###   ########.fr       */
+/*   Updated: 2021/06/08 22:35:52 by forsili          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,10 +21,117 @@
 #define MAX_SIZET 18446744073709599
 #define MIN_INT -2147483648
 
-class   location{
-    private:
+static char		*ft_next(char **a, int *size, char c, int i)
+{
+	char	*start;
 
-        std::string                     name;
+	*size = 0;
+	start = NULL;
+	while (a[0][i])
+	{
+		if (a[0][i] == c && start)
+		{
+			a[0] = start + *size;
+			return (start);
+		}
+		else if (a[0][i] != c && !start)
+			start = &a[0][i];
+		if (a[0][i] != c)
+			*size += 1;
+		i++;
+	}
+	a[0] = start + *size;
+	if (!(*size))
+		return (0);
+	return (start);
+}
+
+char		*ft_strncpy(char *dest, char *src, size_t n, size_t i)
+{
+	while (src[i] && i < n)
+	{
+		dest[i] = src[i];
+		i++;
+	}
+	dest[i] = '\0';
+	return (dest);
+}
+
+char			**ft_split(const char *s, char c)
+{
+	int		size;
+	char	**m;
+	char	*n;
+	char	*a;
+	int		i;
+
+	if (!s)
+		return (NULL);
+	a = (char *)s;
+	i = 0;
+	while (ft_next(&a, &size, c, 0))
+		i++;
+	if (!(m = (char **)malloc((i + 1) * sizeof(char *))))
+		return (NULL);
+	i = 0;
+	a = (char *)s;
+	while ((n = ft_next(&a, &size, c, 0)))
+	{
+		if (!(m[i] = (char *)malloc((size + 1) * sizeof(char))))
+			return (NULL);
+		ft_strncpy(m[i++], n, size, 0);
+	}
+	m[i] = 0;
+	return (m);
+}
+
+int		ft_iscontain(char c, char const *set)
+{
+	while (*set)
+		if (c == *set++)
+			return (1);
+	return (0);
+}
+
+char			*ft_strtrim(char **str, char const *set, int mod)
+{
+	int			len;
+	char		*p;
+	char		*s1;
+
+	s1 = *str;
+	if (!s1 || !set)
+		return (NULL);
+	while (*s1 && ft_iscontain(*s1, set))
+		s1++;
+	len = strlen(s1);
+	if (!len)
+		return ((char *)calloc(1, 1));
+	while (ft_iscontain(s1[len - 1], set))
+		len--;
+	if ((p = strndup(s1, len)) == NULL)
+		return (NULL);
+	p[len] = 0;
+	if (mod)
+		free(*str);
+	return (p);
+}
+
+int 		matrix_len(char **matrix)
+{
+	int i;
+
+	i = 0;
+	if (!matrix)
+		return (0);
+	while (matrix[i])
+		i++;
+	return (i);
+}
+
+class   location{
+    public:
+        std::string                     path;
         std::string                     root;
         std::list<std::string>          index;
         std::list<std::string>          method;
@@ -32,17 +139,140 @@ class   location{
         std::string                     cgi_extention;
         bool                            autoindex;
         size_t                          client_max_body_size;
+    private:
+
+
+        int ft_isdigit(char *s)
+        {
+            int i = 0;
+            while(s[i])
+            {
+                if (!isdigit(s[i]))
+                    return(0);
+                i++;
+            }
+            return (1);
+        }
 
     public:
         
         location(void)
         {
-            this->name = "";
+            this->path = "";
             this->root = "";
             this->cgi_path = "";
             this->cgi_extention = "";
             this->autoindex = false;
             this->client_max_body_size = MAX_SIZET;
+        }
+
+        location(std::string path, std::ifstream &myfile, int &line)
+        {
+            std::string buff;
+            char **argv;
+            char *tmp = NULL;
+            int i = 0;
+            this->path = "";
+            this->root = "";
+            this->cgi_path = "";
+            this->cgi_extention = "";
+            this->autoindex = false;
+            this->client_max_body_size = MAX_SIZET;
+            this->path = path;
+            while (getline(myfile,buff))
+            {
+                tmp = (char *)(buff.c_str());
+                tmp = ft_strtrim(&tmp, " ", 0);
+                argv = ft_split(tmp, ' ');
+                if (argv[0][0] == '#')
+                {
+                    line++;
+                    continue;
+                }
+                if (argv[0][0] == '}')
+                {
+                    line++;
+                    break;
+                }
+                if (!strcmp(argv[0], "root") && strlen(argv[0]) == strlen("root"))
+                {
+                    if (matrix_len(argv) != 2)
+                        std::cout << "Error: invalid root line: " << line << "\n";
+                    else
+                    {
+                        std::cout << argv[1] << "\n";
+                        argv[1] = ft_strtrim(&argv[1], ";", 1);
+                        std::string str(argv[1]);
+                        this->root = str;
+                    }
+                }
+                else if (!strcmp(argv[0], "index") && strlen(argv[0]) == strlen("index"))
+                {
+                    for (size_t k = 1; k < matrix_len(argv); k++)
+                    {
+                        argv[1] = ft_strtrim(&argv[1], ";", 1);
+                        this->index.push_back(std::string(argv[k]));
+                    }
+                }
+                //else if (!strcmp(argv[0], "method") && strlen(argv[0]) == strlen("method"))
+                //{
+                //    for (size_t k = 1; k < matrix_len(argv); k++)
+                //    {
+                //        argv[] = ft_strtrim(&argv[1], ";", 1);
+                //        this->method.push_back(std::string(argv[k]));
+                //    }
+                //}
+                else if (!strcmp(argv[0], "cgi_path") && strlen(argv[0]) == strlen("cgi_path"))
+                {
+                    if (matrix_len(argv) != 2)
+                        std::cout << "Error: invalid CGI path at line: " << line << "\n";
+                    else
+                    {
+                        argv[1] = ft_strtrim(&argv[1], ";", 1);
+                        this->cgi_path = std::string(argv[1]);
+                    }
+                }
+                else if (!strcmp(argv[0], "cgi_extension") && strlen(argv[0]) == strlen("cgi_extension"))
+                {
+                    if (matrix_len(argv) != 2)
+                        std::cout << "Error: invalid CGI extension at line: " << line << "\n";
+                    else
+                    {
+                        argv[1] = ft_strtrim(&argv[1], ";", 1);
+                        this->cgi_extention = std::string(argv[1]);
+                    }
+                }
+                else if (!strcmp(argv[0], "autoindex") && strlen(argv[0]) == strlen("autoindex"))
+                {
+                    if (matrix_len(argv) != 2)
+                        std::cout << "Warning: autoindex mode on false by default at line: " << line << "\n";
+                    else
+                    {
+                        argv[1] = ft_strtrim(&argv[1], ";", 1);
+                        if (!strcmp(argv[1], "true") && strlen(argv[1]) == strlen("true"))
+                            this->autoindex = false;
+                        else
+                            this->autoindex = true;
+
+                    }
+                }
+                else if (!strcmp(argv[0], "client_max_body_size") && strlen(argv[0]) == strlen("client_max_body_size"))
+                {
+                    if (matrix_len(argv) != 2 || !ft_isdigit(argv[1]))
+                        std::cout << "Warning: invalid max body size, setted as default, at line: " << line << "\n";
+                    else
+                    {
+                        argv[1] = ft_strtrim(&argv[1], ";", 1);
+                        this->client_max_body_size = size_t(atoi(argv[1]));
+                    }
+                }
+                else
+                {
+                    std::cout << "Warning: cannot read line " << line << " in location path " << this->path;
+                    std::cout << " command " << argv[0] << " not supported\n";           
+                }
+                line++;
+            }
         }
 
         ~location(){}
@@ -52,9 +282,9 @@ class   location{
             this->root = input;
         }
 
-        void    setName(std::string input)
+        void    setPath(std::string input)
         {
-            this->name = input;
+            this->path = input;
         }
 
         void    setIndex(std::string input)
@@ -104,9 +334,9 @@ class   location{
             return this->root;
         }
 
-        std::string     getName()
+        std::string     getPath()
         {
-            return this->name;
+            return this->path;
         }
 
         std::list<std::string>  getIndex()
@@ -141,30 +371,150 @@ class   location{
 
 };
 
+class errorPages
+{
+    private:
+        int         key[700];
+        std::string path[700];
+    public:
+        errorPages()
+        {
+            for (size_t i = 0; i < 700; i++)
+            {
+                key[i] = i;
+                path[i] = "";
+            }
+        }
+
+        ~errorPages(){}
+        
+        void    insertPath(int code, std::string path)
+        {
+            this->path[code] = path;
+        }
+
+        std::string getPath(int code)
+        {
+            return this->path[code];
+        }
+    };
+
+
 class   config{
     
-
-    private:
+    public:
         std::string             host;
         std::string             port;
         std::string             name;
-        std::list<std::string>  error_pages;
+        errorPages              error_pages;
         std::list<location>     locations;
 
+    private:
+
+        int ft_isdigit(char *s)
+        {
+            int i = 0;
+            while(s[i])
+            {
+                if (!isdigit(s[i]))
+                    return(0);
+                i++;
+            }
+            return (1);
+        }
+
+        void    parse(std::ifstream &myfile)
+        {
+            std::string buff;
+            char **argv;
+            char *tmp = NULL;
+            int line = 0;
+            int i = 0;
+            errorPages  errorP;
+            while (getline(myfile,buff))
+            {
+                tmp = (char *)(buff.c_str());
+                tmp = ft_strtrim(&tmp, " ", 0);
+                argv = ft_split(tmp, ' ');
+                if (matrix_len(argv) == 0 || (!strcmp(argv[0], "#") && strlen(argv[0]) == strlen("#")))
+                {
+                    line++;
+                    continue;
+                }
+                if (!strcmp(argv[0], "}") && strlen(argv[0]) == strlen("}"))
+                {
+                    line++;
+                    break;
+                }
+                if (!strcmp(argv[0], "listen") && strlen(argv[0]) == strlen("listen"))
+                {
+                    if (matrix_len(argv) != 3)
+                        std::cout << "Error: no port or address at line: " << line << "\n";
+                    else
+                    {
+                        i = 1;
+                        while(i < 3)
+                        {
+                            argv[i] = argv[1] = ft_strtrim(&argv[i], ";", 1);
+                            if (ft_isdigit(argv[i]))
+                                this->host = std::string(argv[i]);
+                            else
+                                this->port = std::string(argv[i]);
+                            i++;
+                        }
+                    }
+                }
+                else if (!strcmp(argv[0], "server_name") && strlen(argv[0]) == strlen("server_name"))
+                {
+                    if (matrix_len(argv) != 2)
+                        std::cout << "Error: too or no name for server in line: " << line << "\n";
+                    else
+                    {
+                        argv[1] = argv[1] = ft_strtrim(&argv[1], ";", 1);
+                        this->name = std::string(argv[1]);
+                    }
+                }                
+                else if (!strcmp(argv[0], "error_page") && strlen(argv[0]) == strlen("error_page"))                
+                {
+                    if (matrix_len(argv) != 3)
+                        std::cout << "Error: too argument for error_page ex.(error_page 404 /path/path;) in line: " << line << "\n";
+                    else{
+                        if (ft_isdigit(argv[1]))
+                            errorP.insertPath(atoi(argv[1]), argv[2]);
+                        else
+                            std::cout << "Warning: invalid not numbered error, ignoring at line: " << line << "\n";
+                    }
+                    
+                }
+                else if (!strcmp(argv[0], "location") && strlen(argv[0]) == strlen("location"))                
+                {
+                    if (matrix_len(argv) != 3)
+                        std::cout << "Error: syntax not valid for location in line: " << line << "\n";
+                    else {
+                        std::string path_location(argv[1]);
+                        location    loc(path_location, myfile, line);
+                        this->locations.push_back(loc);
+                    }
+                }
+                else
+                {
+                    std::cout << "Warning: cannot read line " << line;
+                    std::cout << " command " << argv[0] << " not supported\n";           
+                }
+                //std::cout << line << std::endl;
+                line++;
+            }
+            this->error_pages = errorP;
+        }        
     public:
         config()
         {
             std::string path = "./config/webserv.conf";
             std::string line;
             std::string buffer;
-            std::ifstream myfile (path);
+            std::ifstream myfile(path);
             if (myfile.is_open())
-            {
-                while ( getline (myfile,line) )
-                    buffer.append(line + "\n");
-                myfile.close();
-                //this->parse(buffer);
-            }
+                parse(myfile);
             else
                 std::cerr << "Error: can't open config file\n";
             std::cout << buffer;
