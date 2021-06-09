@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   conf_parsing.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aduregon <aduregon@42.fr>                  +#+  +:+       +#+        */
+/*   By: forsili <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/07 09:43:52 by forsili           #+#    #+#             */
-/*   Updated: 2021/06/09 10:54:32 by aduregon         ###   ########.fr       */
+/*   Updated: 2021/06/09 11:12:40 by forsili          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,7 +124,7 @@ char			*ft_strtrim(char **str, char const *set, int mod)
 		s1++;
 	len = strlen(s1);
 	if (!len)
-		return ((char *)calloc(1, 1));
+		return (NULL);
 	while (ft_iscontain(s1[len - 1], set))
 		len--;
 	if ((p = strndup(s1, len)) == NULL)
@@ -161,9 +161,9 @@ void    free_matrix(char **matrix)
 
 char **check_command(char *cmd)
 {
-    char **tmp;
-    char **semi;
-    char **space;
+    char **tmp = NULL;
+    char **semi = NULL;
+    char **space = NULL;
     tmp = ft_split(cmd, '#');
     if (tmp && tmp[0])
     {
@@ -171,13 +171,18 @@ char **check_command(char *cmd)
         if (semi && semi[0])
         {
             space = ft_split(semi[0], ' ');
-            free_matrix(tmp);
-            free_matrix(semi);
-            return (space);
+            if (space && space[0])
+            {
+                free_matrix(tmp);
+                free_matrix(semi);
+                return (space);
+            }
         }
-        else
-            free_matrix(tmp);
     }
+    if (tmp)
+        free_matrix(tmp);
+    if (semi)
+        free_matrix(semi);
     return NULL;
 }
 
@@ -223,7 +228,6 @@ class   location{
             std::string buff;
             char **argv;
             char *tmp = NULL;
-            int i = 0;
             this->path = "";
             this->root = "";
             this->cgi_path = "";
@@ -261,7 +265,7 @@ class   location{
                 }
                 else if (!strcmp(argv[0], "index") && strlen(argv[0]) == strlen("index"))
                 {
-                    for (size_t k = 1; k < matrix_len(argv); k++)
+                    for (size_t k = 1; k < (size_t)(matrix_len(argv)); k++)
                         this->index.push_back(std::string(argv[k]));
                     line++;
                 }
@@ -345,7 +349,7 @@ class   location{
 
         void    setIndex(std::string *input, int size)
         {
-            for (size_t i = 0; i < size; i++)
+            for (size_t i = 0; i < (size_t)(size); i++)
                 this->index.push_back(input[i]);
         }
 
@@ -356,7 +360,7 @@ class   location{
 
         void    setMethod(std::string *input, int size)
         {
-            for (size_t i = 0; i < size; i++)
+            for (size_t i = 0; i < (size_t)(size); i++)
                 this->method.push_back(input[i]);
         }
 
