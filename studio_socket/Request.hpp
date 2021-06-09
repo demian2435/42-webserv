@@ -6,7 +6,7 @@
 /*   By: aduregon <aduregon@42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/09 18:43:15 by aduregon         ###   ########.fr       */
+/*   Updated: 2021/06/09 18:54:55 by aduregon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,29 +16,6 @@
 #include <string>
 #include <stdlib.h>
 #include "../config/conf_parsing.hpp"
-
-char		*ft_strjoin(char *s1, char s2)
-{
-	char *tmp;
-
-	if (!s1)
-	{
-		tmp = (char *)calloc(2, sizeof(char));
-		tmp[0] = s2;
-		return (tmp);
-	}
-	int		s1_len = strlen(s1);
-	tmp = (char *)calloc((s1_len + 2), sizeof(char));
-	int i = 0;
-	while (s1[i])
-	{
-		tmp[i] = s1[i];
-		i++;
-	}
-	tmp[i] = s2;
-	//free(s1);
-	return (tmp);
-}
 
 class Request
 {
@@ -85,18 +62,6 @@ private:
 	std::string		referer;
 	std::string		path;
 	std::string		body;
-
-	void	parse_body(char *r, int &i)
-	{
-		char *tmp = NULL;
-		while (r[i])
-		{
-			tmp = ft_strjoin(tmp, r[i]);
-			i++;
-			
-		}
-		this->body = std::string(tmp);
-	}
 
 public:
 	Request(/* args */)
@@ -653,18 +618,11 @@ public:
 			this->body += str[i];
 			i++;
 		}
-		// std::cout << this->method << " ";
-		// std::cout << this->method_path << " ";
-		// std::cout << this->http_version << std::endl;
-		// std::cout << this->host << std::endl;
-		// std::cout << this->connection << std::endl;
-		// std::cout << this->referer << std::endl;
-		// std::cout << this->body << std::endl;
 	}
 
 	~Request() {}
 
-	void		print_request()
+	void	print_request()
 	{
 	//	std::string		method;
 	if (this->method.compare(""))
@@ -791,7 +749,7 @@ public:
 		std::cout << this->path << std::endl;
 	// std::string		body;
 	if (this->body.compare(""))
-		std::cout << this->body << std::endl;
+		std::cout << std::endl << this->body << std::endl;
 	}
 };
 
