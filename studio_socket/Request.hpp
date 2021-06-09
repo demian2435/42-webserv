@@ -6,14 +6,14 @@
 /*   By: aduregon <aduregon@42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/09 13:18:42 by aduregon         ###   ########.fr       */
+/*   Updated: 2021/06/09 17:33:22 by aduregon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include <iostream>
-#include <unistd.h>
+#include <string>
 #include <stdlib.h>
 #include "../config/conf_parsing.hpp"
 
@@ -69,7 +69,7 @@ public:
 	{
 		this->method = "GET";
 		this->method_path = "/";
-		this->http_version = "1.1";
+		this->http_version = "HTTP/1.1";
 		this->host = "";
 		this->connection = "keep-alive";
 		this->referer = "";
@@ -80,65 +80,108 @@ public:
 	Request(char *r)
 	{
 		this->method = "GET";
-		this->method_path = "/";
-		this->http_version = "1.1";
+		this->method_path = "";
+		this->http_version = "";
 		this->host = "";
 		this->connection = "keep-alive";
 		this->referer = "";
 		this->path = "/";
 		this->body = "";
-		char *line;
-		char **tmp;
+		std::string str = r;
 
 		int i = 0;
-		while (r[i])
+		while (str[i])
 		{
-			line = NULL;
-			while (r[i] != '\n')
-			{
-				line = ft_strjoin(line, r[i]);
-				i++;
-			}
 			if (i == 0)
 			{
-				tmp = ft_split(line, ' ');
-				if (matrix_len(tmp) == 3)
+				if (!(str.compare(i, 3, "GET")))
 				{
-					this->method = std::string(tmp[0]);
-					this->method_path = std::string(tmp[1]);
-					this->http_version = std::string(ft_strtrim(&tmp[2], "HTTP/", 1));
+					this->method = "GET";
+					i += 4;
+				}
+				else if (!(str.compare(i, 4, "POST")))
+				{
+					this->method = "POST";
+					i += 5;
+				}
+				else if (!(str.compare(i, 6, "DELETE")))
+				{
+					this->method = "DELETE";
+					i += 7;
 				}
 				else
 				{
-					std::cout << "ERRORE\n";
+					std::cout << "\033[33m" << "Invalid method" << "\033[0m" << std::endl;
+				}
+				while (str[i] != 32)
+				{
+					this->method_path += str[i];
+					i++;
+				}
+				while (str[i] != '\n')
+				{
+					this->http_version += str[i];
+					i++;
+				}
+			}
+			else if (!(str.compare(i, 5, "Host:")))
+			{
+				this->host.clear();
+				while (str[i] != 32)
+					i++;
+				i++;
+				while (str[i] != '\n')
+				{
+					this->host += str[i];
+					i++;
+				}
+			}
+			else if ( !(str.compare(i, 11, "Connection:")))
+			{
+				this->connection.clear();
+				while (str[i] != 32)
+					i++;
+				i++;
+				while (str[i] != '\n')
+				{
+					this->connection += str[i];
+					i++;
+				}
+			}
+			else if (!(str.compare(i, 8, "Referer:")))
+			{
+				this->referer.clear();
+				while (str[i] != 32)
+					i++;
+				i++;
+				while (str[i] != '\n')
+				{
+					this->referer += str[i];
+					i++;
 				}
 			}
 			else
 			{
-				tmp = ft_split(line, ':');
-				for (int k = 0; k < matrix_len(tmp); k++)
-					tmp[k] = ft_strtrim(&tmp[k], " ", 1);
-				if (!tmp)
-					parse_body(r, i);
-				else if (!strcmp(tmp[0], "Host") && strlen(tmp[0]) == strlen("Host"))
+				if (str[i] == '\n' && str[i + 1] && str[i + 1] == '\n')
 				{
-					if (matrix_len(tmp) == 2)
-						this->host = std::string(tmp[1]);
+					i += 2;
+					break;
 				}
-				else if (!strcmp(tmp[0], "Connection") && strlen(tmp[0]) == strlen("Connection"))
-				{
-					if (matrix_len(tmp) == 2)
-						this->connection = std::string(tmp[1]);
-				}
-				else if (!strcmp(tmp[0], "Referer") && strlen(tmp[0]) == strlen("Referer"))
-				{
-					if (matrix_len(tmp) == 2)
-						this->referer = std::string(tmp[1]);
-				}
-			}
-			if (r[i])
 				i++;
+			}
 		}
+		while (str[i])
+		{
+			this->body += str[i];
+			i++;
+		}
+		std::cout << this->method << " ";
+		std::cout << this->method_path << " ";
+		std::cout << this->http_version << std::endl;
+		std::cout << this->host << std::endl;
+		std::cout << this->connection << std::endl;
+		std::cout << this->referer << std::endl;
+		std::cout << this->body << std::endl;
 	}
 
 	~Request() {}
