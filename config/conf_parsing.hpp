@@ -6,7 +6,7 @@
 /*   By: forsili <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/07 09:43:52 by forsili           #+#    #+#             */
-/*   Updated: 2021/06/08 23:07:34 by forsili          ###   ########.fr       */
+/*   Updated: 2021/06/09 10:39:56 by forsili          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,6 +147,39 @@ int 		matrix_len(char **matrix)
 	return (i);
 }
 
+void    free_matrix(char **matrix)
+{
+    int i = 0;
+    while (matrix[i])
+    {
+        free(matrix[i]);
+        i++;
+    }
+    //free(matrix[i]);    
+}
+
+char **check_command(char *cmd)
+{
+    char **tmp;
+    char **semi;
+    char **space;
+    tmp = ft_split(cmd, '#');
+    if (tmp && tmp[0])
+    {
+        semi = ft_split(tmp[0], ';');
+        if (semi && semi[0])
+        {
+            space = ft_split(semi[0], ' ');
+            free_matrix(tmp);
+            free_matrix(semi);
+            return (space);
+        }
+        else
+            free_matrix(tmp);
+    }
+    return NULL;
+}
+
 class   location{
     public:
         std::string                     path;
@@ -201,7 +234,7 @@ class   location{
             {
                 tmp = (char *)(buff.c_str());
                 tmp = ft_strtrim(&tmp, " ", 0);
-                argv = ft_split(tmp, ' ');
+                argv = check_command(tmp);
                 if (matrix_len(argv) == 0 || (!strcmp(argv[0], "#")))
                 {
                     line++;
@@ -458,8 +491,8 @@ class   config{
             {
                 tmp = (char *)(buff.c_str());
                 tmp = ft_strtrim(&tmp, " ", 0);
-                argv = ft_split(tmp, ' ');
-                if (matrix_len(argv) == 0 || !strcmp(argv[0], "#"))
+                argv = check_command(tmp);
+                if (matrix_len(argv) == 0)
                 {
                     line++;
                     continue;
@@ -504,6 +537,7 @@ class   config{
                     if (matrix_len(argv) != 3)
                         std::cout << "Error: too argument for error_page ex.(error_page 404 /path/path;) in line: " << line << "\n";
                     else{
+                        argv[2] = ft_strtrim(&argv[2], ";", 1);
                         if (ft_isdigit(argv[1]))
                             errorP.insertPath(atoi(argv[1]), argv[2]);
                         else
@@ -522,7 +556,7 @@ class   config{
                         this->locations.push_back(loc);
                     }
                 }
-                else
+                else if (argv)
                 {
                     std::cout << "Warning: cannot read line " << line;
                     std::cout << " command " << argv[0] << " not supported\n";           
