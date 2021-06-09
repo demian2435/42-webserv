@@ -1,6 +1,6 @@
 #include "config/conf_parsing.hpp"
-
-int main()
+#include "studio_socket/Request.hpp"
+void    test_config()
 {
     config  info;
 
@@ -34,4 +34,10 @@ int main()
         std::cout << "  max body size: " << it->getMaxBodySize() << std::endl;
         it++;
     }
+}
+
+int main()
+{
+    std::string req = "GET /favicon.ico HTTP/1.1\nHost: localhost:8080\nConnection: keep-alive\nUser-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Safari/537.36\nAccept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8\nSec-Fetch-Site: same-origin\nSec-Fetch-Mode: no-cors\nSec-Fetch-Dest: image\nReferer: http://localhost:8080/vcvcvcv\nAccept-Encoding: gzip, deflate, br\nAccept-Language: it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7";
+    Request r((char *)(req.c_str()));
 }
