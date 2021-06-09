@@ -6,7 +6,7 @@
 /*   By: forsili <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/07 09:43:52 by forsili           #+#    #+#             */
-/*   Updated: 2021/06/09 11:35:38 by forsili          ###   ########.fr       */
+/*   Updated: 2021/06/09 11:41:17 by forsili          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -507,7 +507,7 @@ class   config{
                 if (!strcmp(argv[0], "listen") && strlen(argv[0]) == strlen("listen"))
                 {
                     if (matrix_len(argv) != 3)
-                        std::cout << "Error: no port or address at line: " << line << "\n";
+                        std::cout << RED << "Error: no port or address at line: " << line << "\n" <<RESET;
                     else
                     {
                         i = 1;
@@ -525,7 +525,7 @@ class   config{
                 else if (!strcmp(argv[0], "server_name") && strlen(argv[0]) == strlen("server_name"))
                 {
                     if (matrix_len(argv) != 2)
-                        std::cout << "Error: too or no name for server in line: " << line << "\n";
+                        std::cout << RED <<"Error: too or no name for server in line: " << line << "\n" <<RESET;
                     else
                         this->name = std::string(argv[1]);
                     line++;
@@ -533,19 +533,19 @@ class   config{
                 else if (!strcmp(argv[0], "error_page") && strlen(argv[0]) == strlen("error_page"))                
                 {
                     if (matrix_len(argv) != 3)
-                        std::cout << "Error: too argument for error_page ex.(error_page 404 /path/path;) in line: " << line << "\n";
+                        std::cout << RED << "Error: too argument for error_page ex.(error_page 404 /path/path;) in line: " << line << "\n" <<RESET;
                     else{
-                        if (ft_isdigit(argv[1]))
+                        if (ft_isdigit(argv[1]) && atoi(argv[1]) < 700)
                             errorP.insertPath(atoi(argv[1]), argv[2]);
                         else
-                            std::cout << "Warning: invalid not numbered error, ignoring at line: " << line << "\n";
+                            std::cout <<YELLOW << "Warning: invalid not numbered error, ignoring at line: " << line << "\n" <<RESET;
                     }
                     line++;
                 }
                 else if (!strcmp(argv[0], "location") && strlen(argv[0]) == strlen("location"))                
                 {
                     if (matrix_len(argv) != 3)
-                        std::cout << "Error: syntax not valid for location in line: " << line << "\n";
+                        std::cout << RED <<"Error: syntax not valid for location in line: " << line << "\n" <<RESET;
                     else {
                         std::string path_location(argv[1]);
                         line++;
@@ -555,8 +555,8 @@ class   config{
                 }
                 else if (argv)
                 {
-                    std::cout << "Warning: cannot read line " << line;
-                    std::cout << " command " << argv[0] << " not supported\n";           
+                    std::cout << YELLOW<< "Warning: cannot read line " << line;
+                    std::cout << " command " << argv[0] << " not supported\n" <<RESET;           
                     line++;
                 }
                 //std::cout << line << std::endl;
