@@ -135,7 +135,7 @@ int main(void)
 						// Chiudiamo la connessione
 						close (i);
 						// Eliminiamo l'FD dal set base
-						FD_CLR(i, &base_fd); 
+						FD_CLR(i, &base_fd);
 					}
 					else // Il server risponde ai Client
 					{

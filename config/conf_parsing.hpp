@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   conf_parsing.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: forsili <marvin@42.fr>                     +#+  +:+       +#+        */
+/*   By: aduregon <aduregon@42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/07 09:43:52 by forsili           #+#    #+#             */
-/*   Updated: 2021/06/09 10:39:56 by forsili          ###   ########.fr       */
+/*   Updated: 2021/06/09 10:54:32 by aduregon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,7 +155,8 @@ void    free_matrix(char **matrix)
         free(matrix[i]);
         i++;
     }
-    //free(matrix[i]);    
+    free(matrix[i]);
+    free(matrix);
 }
 
 char **check_command(char *cmd)
@@ -243,6 +244,8 @@ class   location{
                 if (!strcmp(argv[0], "}"))
                 {
                     line++;
+                    free(tmp);
+                    free_matrix(argv);
                     break;
                 }
                 if (!strcmp(argv[0], "root") && strlen(argv[0]) == strlen("root"))
@@ -251,7 +254,6 @@ class   location{
                         std::cout << RED << "Error: invalid root line: " << line << "\n" << RESET;
                     else
                     {
-                        argv[1] = ft_strtrim(&argv[1], ";", 1);
                         std::string str(argv[1]);
                         this->root = str;
                     }
@@ -260,17 +262,13 @@ class   location{
                 else if (!strcmp(argv[0], "index") && strlen(argv[0]) == strlen("index"))
                 {
                     for (size_t k = 1; k < matrix_len(argv); k++)
-                    {
-                        argv[1] = ft_strtrim(&argv[1], ";", 1);
                         this->index.push_back(std::string(argv[k]));
-                    }
                     line++;
                 }
                 //else if (!strcmp(argv[0], "method") && strlen(argv[0]) == strlen("method"))
                 //{
                 //    for (size_t k = 1; k < matrix_len(argv); k++)
                 //    {
-                //        argv[] = ft_strtrim(&argv[1], ";", 1);
                 //        this->method.push_back(std::string(argv[k]));
                 //    }
                 //}
@@ -279,10 +277,7 @@ class   location{
                     if (matrix_len(argv) != 2)
                         std::cout << RED <<"Error: invalid CGI path at line: " << line << "\n" << RESET;
                     else
-                    {
-                        argv[1] = ft_strtrim(&argv[1], ";", 1);
                         this->cgi_path = std::string(argv[1]);
-                    }
                     line++;
                 }
                 else if (!strcmp(argv[0], "cgi_extension") && strlen(argv[0]) == strlen("cgi_extension"))
@@ -290,10 +285,7 @@ class   location{
                     if (matrix_len(argv) != 2)
                         std::cout << RED << "Error: invalid CGI extension at line: " << line << "\n" <<RESET;
                     else
-                    {
-                        argv[1] = ft_strtrim(&argv[1], ";", 1);
                         this->cgi_extention = std::string(argv[1]);
-                    }
                     line++;
                 }
                 else if (!strcmp(argv[0], "autoindex") && strlen(argv[0]) == strlen("autoindex"))
@@ -302,7 +294,6 @@ class   location{
                         std::cout << YELLOW << "Warning: autoindex mode on false by default at line: " << line << "\n" << RESET;
                     else
                     {
-                        argv[1] = ft_strtrim(&argv[1], ";", 1);
                         if (!strcmp(argv[1], "true") && strlen(argv[1]) == strlen("true"))
                             this->autoindex = false;
                         else
@@ -313,7 +304,6 @@ class   location{
                 }
                 else if (!strcmp(argv[0], "client_max_body_size") && strlen(argv[0]) == strlen("client_max_body_size"))
                 {
-                    argv[1] = ft_strtrim(&argv[1], ";", 1);
                     if (matrix_len(argv) != 2 || !ft_isdigit(argv[1]))
                         std::cout << YELLOW <<"Warning: invalid max body size, setted as default, at line: " << line << "\n" << RESET;
                     else
@@ -329,6 +319,10 @@ class   location{
                     std::cout << " command " << argv[0] << " not supported\n" <<RESET;           
                     line++;
                 }
+                if (tmp)
+                    free(tmp);
+                if (argv)
+                    free_matrix(argv);
             }
         }
 
@@ -499,6 +493,8 @@ class   config{
                 }
                 if (!strcmp(argv[0], "}"))
                 {
+                    free(tmp);
+                    free_matrix(argv);
                     line++;
                     break;
                 }
@@ -511,7 +507,6 @@ class   config{
                         i = 1;
                         while(i < 3)
                         {
-                            argv[i] = argv[1] = ft_strtrim(&argv[i], ";", 1);
                             if (ft_isdigit(argv[i]))
                                 this->host = std::string(argv[i]);
                             else
@@ -526,10 +521,7 @@ class   config{
                     if (matrix_len(argv) != 2)
                         std::cout << "Error: too or no name for server in line: " << line << "\n";
                     else
-                    {
-                        argv[1] = argv[1] = ft_strtrim(&argv[1], ";", 1);
                         this->name = std::string(argv[1]);
-                    }
                     line++;
                 }                
                 else if (!strcmp(argv[0], "error_page") && strlen(argv[0]) == strlen("error_page"))                
@@ -537,7 +529,6 @@ class   config{
                     if (matrix_len(argv) != 3)
                         std::cout << "Error: too argument for error_page ex.(error_page 404 /path/path;) in line: " << line << "\n";
                     else{
-                        argv[2] = ft_strtrim(&argv[2], ";", 1);
                         if (ft_isdigit(argv[1]))
                             errorP.insertPath(atoi(argv[1]), argv[2]);
                         else
@@ -563,6 +554,10 @@ class   config{
                     line++;
                 }
                 //std::cout << line << std::endl;
+                if (tmp)
+                    free(tmp);
+                if (argv)
+                    free_matrix(argv);
             }
             this->error_pages = errorP;
         }        
@@ -581,14 +576,16 @@ class   config{
                 {
                     tmp = (char *)(buffer.c_str());
                     tmp = ft_strtrim(&tmp, " ", 0);
-                    argv = ft_split(tmp, ' ');
-                    if (matrix_len(argv) == 0 || (!strcmp(argv[0], "#") && strlen(argv[0]) == strlen("#")))
+                    argv = check_command(tmp);
+                    if (matrix_len(argv) == 0)
                     {
                         line++;
                         continue;
                     }
                     if (!strcmp(argv[0], "}") && strlen(argv[0]) == strlen("}"))
                     {
+                        free(tmp);
+                        free_matrix(argv);
                         line++;
                         break;
                     }
@@ -596,7 +593,11 @@ class   config{
                     {
                         line++;
                         parse(myfile, line);
-                    }            
+                    } 
+                    if (tmp)
+                        free(tmp);
+                    if (argv)
+                        free_matrix(argv);           
                 }
             }
             else
