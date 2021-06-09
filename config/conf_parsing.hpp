@@ -6,7 +6,7 @@
 /*   By: forsili <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/07 09:43:52 by forsili           #+#    #+#             */
-/*   Updated: 2021/06/09 11:12:40 by forsili          ###   ########.fr       */
+/*   Updated: 2021/06/09 11:35:38 by forsili          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -226,12 +226,14 @@ class   location{
         location(std::string path, std::ifstream &myfile, int &line)
         {
             std::string buff;
+            std::list<std::string> lst;
             char **argv;
             char *tmp = NULL;
             this->path = "";
             this->root = "";
             this->cgi_path = "";
             this->cgi_extention = "";
+            this->index = lst;
             this->autoindex = false;
             this->client_max_body_size = MAX_SIZET;
             this->path = path;
