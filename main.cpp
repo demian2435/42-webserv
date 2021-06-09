@@ -38,6 +38,7 @@ void    test_config()
 
 int main()
 {
-    std::string req = "POST /favicon.ico HTTP/1.1\nHost: localhost:8080\nConnection: keep-alive\nUser-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Safari/537.36\nAccept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8\nSec-Fetch-Site: same-origin\nSec-Fetch-Mode: no-cors\nSec-Fetch-Dest: image\nReferer: http://localhost:8080/vcvcvcv\nAccept-Encoding: gzip, deflate, br\nAccept-Language: it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7\n\nQUESTO E IL BODY";
+    std::string req = "POST /cgi-bin/process.cgi HTTP/1.1\nUser-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)\nHost: www.tutorialspoint.com\nContent-Type: text/xml; charset=utf-8\nContent-Length: 600\nAccept-Language: en-us\nAccept-Encoding: gzip, deflate\nConnection: Keep-Alive\n\n<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<string xmlns=\"http://clearforest.com/\">string</string>";
     Request r((char *)(req.c_str()));
+    r.print_request();
 }
