@@ -156,6 +156,7 @@ int main(void)
 									Request req(buff);
 									// Mandiamo la risposta al client
 									Response resp(conf, req);
+									std::cout << GREEN << resp.out << RESET << std::endl;
 									if (send(j, resp.out.c_str(), resp.out.length(), 0) == -1) {
 										std::cout << "ERRORE SEND" << std::endl;
 									}

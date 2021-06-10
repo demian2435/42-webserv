@@ -6,7 +6,7 @@
 /*   By: forsili <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/10 11:21:54 by forsili          ###   ########.fr       */
+/*   Updated: 2021/06/10 13:32:02 by forsili          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,7 @@ public:
 	std::string		connection;
 	std::string		referer;
 	std::string		path;
+	//std::list<std::string>	path_list;
 	std::string		body;
 	bool			error;
 
@@ -629,6 +630,20 @@ public:
 
 	~Request() {}
 
+	std::list<std::string> tokenize(std::string s, std::string del = " ")
+	{
+		std::list<std::string> out;
+	    int start = 0;
+	    int end = s.find(del);
+	    while (end != -1) {
+	        out.push_front(s.substr(start, end - start));
+	        start = end + del.size();
+	        end = s.find(del, start);
+	    }
+	    out.push_front(s.substr(start, end - start));
+		return out;
+	}
+
 	void	check_request()
 	{
 		if (this->method.compare("GET") && this->method.compare("POST") && this->method.compare("DELETE"))
@@ -658,15 +673,19 @@ public:
 		}
 		if (this->referer.compare(""))
 		{
-			int j = 7 + this->host.length();
-			while (this->referer[j])
-			{
-				this->path += this->referer[j];
-				j++;
-			}
+			std::list<std::string> list = tokenize(this->referer, this->host);
+			std::list<std::string>::iterator it(list.end());
+			it--;
+			this->path = *it;
 		}
 		else
 			this->path = this->method_path;
+		//int i = 0;
+		//while (this->path_list.substr(i, this->path.find("/")))
+		//{
+		//	this->path_list.push_back( "/" + this->path_list.substr(i, this->path.find("/")));
+		//	i++;
+		//}
 	}
 
 	void	print_request()

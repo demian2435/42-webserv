@@ -1,4 +1,4 @@
-#include "config/conf_parsing.hpp"
+#include "studio_socket/conf_parsing.hpp"
 #include "studio_socket/Request.hpp"
 #include "studio_socket/Response.hpp"
 config    test_config()
@@ -40,7 +40,7 @@ config    test_config()
 
 Request request_test()
 {
-    std::string req = "GET / HTTP/1.1\nHost: localhost:8080\nReferer: http://localhost:8080/\nConnection: keep-alive\n\n";
+    std::string req = "GET / HTTP/1.1\nHost: localhost:8080\nReferer: http://localhost:8080/ciccio/html\nConnection: keep-alive\n\n";
     Request r((char *)(req.c_str()));
     r.print_request();
     return r;

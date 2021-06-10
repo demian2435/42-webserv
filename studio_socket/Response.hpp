@@ -6,7 +6,7 @@
 /*   By: forsili <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/10 09:47:56 by forsili           #+#    #+#             */
-/*   Updated: 2021/06/10 11:21:36 by forsili          ###   ########.fr       */
+/*   Updated: 2021/06/10 13:30:53 by forsili          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 #include "conf_parsing.hpp"
 #include "Request.hpp"
+#include <sstream>
 
 #define DEFAULT_404 "<html><h1>ERROR 404 NOT FOUND</h1></html>"
 #define DEFAULT_400 "<html><h1>ERROR 400 BAD REQUEST</h1></html>"
@@ -58,6 +59,23 @@ class Response
 			return "";
 		}
 
+		std::list<std::string>	listify_path(std::string path)
+		{
+			char **matrix = ft_split(path.c_str(), '/');
+			std::list<std::string>	out;
+			int i = 0;
+
+			while (matrix[i])
+			{
+				out.push_back("/" + std::string(matrix[i]));
+				i++;
+			}
+			if (out.size() == 0)
+				out.push_back("/");
+			free_matrix(matrix);
+			return out;
+		}
+
 		std::string	take_body(config c, Request r)
 		{
 			std::list<location>::iterator	it(c.locations.begin());
@@ -74,7 +92,11 @@ class Response
 			{
 				index = it->index.begin();
 				//std::cout << r.path << " vs " << it->path << "X" <<  std::endl;
-				if (!r.path.compare(it->path))
+				std::list<std::string>				path_list = listify_path(r.path);
+				std::list<std::string>::iterator	path_it(path_list.begin());
+				std::string							final_path = "";
+				std::cout << "######################### " << r.path << std::endl;
+				if (!r.path.compare(it->path) && path_list.size() == 1)
 				{
 					for (size_t k = 0; k < it->index.size(); k++)
 					{
@@ -83,6 +105,22 @@ class Response
 							return read_path(it->root + *index, 200);
 						index++;
 					}
+					if (read_path(it->root, 200) != "")
+							return read_path(it->root, 200);
+				}
+				else if (!path_it->compare(it->path) && path_list.size() > 1)
+				{
+					for (size_t k = 0; k < path_list.size(); k++)
+					{
+						if (i == 0)
+							final_path += it->root;
+						else
+							final_path += *path_it;
+						path_it++;
+					}
+					std::cout << "######################### " << final_path << std::endl;
+					if (read_path(final_path, 200) != "")
+							return read_path(final_path, 200);
 				}
 				it++;
 				i++;
