@@ -6,7 +6,7 @@
 /*   By: aduregon <aduregon@42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/09 18:54:55 by aduregon         ###   ########.fr       */
+/*   Updated: 2021/06/10 10:39:31 by aduregon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,13 +62,14 @@ private:
 	std::string		referer;
 	std::string		path;
 	std::string		body;
+	bool			error;
 
 public:
 	Request(/* args */)
 	{
-		this->method = "GET";
+		this->method = "";
 		this->method_path = "/";
-		this->http_version = "HTTP/1.1";
+		this->http_version = "";
 		this->a_im = "";
 		this->accept = "";
 		this->accept_charset = "";
@@ -106,15 +107,16 @@ public:
 		this->host = "";
 		this->connection = "keep-alive";
 		this->referer = "";
-		this->path = "/";
+		this->path = "";
 		this->body = "";
+		this->error = false;
 	}
 
 	Request(char *r)
 	{
-		this->method = "GET";
+		this->method = "";
 		this->method_path = "/";
-		this->http_version = "HTTP/1.1";
+		this->http_version = "";
 		this->a_im = "";
 		this->accept = "";
 		this->accept_charset = "";
@@ -150,10 +152,11 @@ public:
 		this->via = "";
 		this->warning = "";
 		this->host = "";
-		this->connection = "keep-alive";
+		this->connection = "";
 		this->referer = "";
-		this->path = "/";
+		this->path = "";
 		this->body = "";
+		this->error = false;
 		std::string str = r;
 
 		int i = 0;
@@ -180,11 +183,14 @@ public:
 				{
 					std::cout << "\033[33m" << "Invalid method" << "\033[0m" << std::endl;
 				}
+				this->method_path.clear();
 				while (str[i] != 32)
 				{
 					this->method_path += str[i];
 					i++;
 				}
+				while (str[i] == 32)
+					i++;
 				while (str[i] != '\n')
 				{
 					this->http_version += str[i];
@@ -618,9 +624,50 @@ public:
 			this->body += str[i];
 			i++;
 		}
+		this->check_request();
 	}
 
 	~Request() {}
+
+	void	check_request()
+	{
+		if (this->method.compare("GET") && this->method.compare("POST") && this->method.compare("DELETE"))
+		{
+			this->error = true;
+			return ;
+		}
+		if (!(this->method_path.compare("")))
+		{
+			this->error = true;
+			return ;
+		}
+		if (!(this->http_version.compare("")))
+		{
+			this->error = true;
+			return ;
+		}
+		if (!(this->connection.compare("")))
+		{
+			this->error = true;
+			return ;
+		}
+		if (!(this->host.compare("")))
+		{
+			this->error = true;
+			return ;
+		}
+		if (this->referer.compare(""))
+		{
+			int j = 7 + this->host.length();
+			while (this->referer[j])
+			{
+				this->path += this->referer[j];
+				j++;
+			}
+		}
+		else
+			this->path = this->method_path;
+	}
 
 	void	print_request()
 	{
