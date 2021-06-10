@@ -6,7 +6,7 @@
 /*   By: forsili <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/07 09:43:52 by forsili           #+#    #+#             */
-/*   Updated: 2021/06/09 11:41:17 by forsili          ###   ########.fr       */
+/*   Updated: 2021/06/10 11:22:11 by forsili          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -570,7 +570,7 @@ class   config{
     public:
         config()
         {
-            std::string path = "./config/webserv.conf";
+            std::string path = "../config/webserv.conf";
             std::string buffer;
             std::ifstream myfile(path);
             char    *tmp;

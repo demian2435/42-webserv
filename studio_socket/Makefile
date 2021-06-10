@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: aduregon <aduregon@42.fr>                  +#+  +:+       +#+         #
+#    By: forsili <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/04/23 11:15:19 by dmalori           #+#    #+#              #
-#    Updated: 2021/06/08 17:34:18 by aduregon         ###   ########.fr        #
+#    Updated: 2021/06/10 11:22:39 by forsili          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -90,7 +90,7 @@ NAME_C		=	c
 SRC_S		=	server.cpp
 SRC_C		=	client.cpp
 CC			=	clang++
-CFLAGS		=	-g -Wall -Wextra -Werror -std=c++98 -pedantic
+CFLAGS		=	#-g -Wall -Wextra -Werror -std=c++98 -pedantic
 
 all			:	$(NAME_S) $(NAME_C)
 

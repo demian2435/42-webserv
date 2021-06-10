@@ -7,6 +7,9 @@
 #include <string>
 #include <fcntl.h>
 #include <arpa/inet.h>
+#include "conf_parsing.hpp"
+#include "Response.hpp"
+#include "Request.hpp"
 #define PORT 8080
 #define BUFFER_SIZE 1024
 #define MAX_CONNECTIONS 999
@@ -17,7 +20,7 @@
 int main(void)
 {
 	//---------------VARIABILI----------------//
-
+	config	conf;
 	// Contenitore per i file descriptor che arriveranno
 	fd_set temp_fd;
 	// Contenitore di backup, cosi da controllare le differenze nel tempo
@@ -150,9 +153,10 @@ int main(void)
 									for (int k = 0; k < nbytes; k++)
 										std::cout << buff[k];
 									std::cout << std::endl;
-
+									Request req(buff);
 									// Mandiamo la risposta al client
-									if (send(j, hello.c_str(), hello.length(), 0) == -1) {
+									Response resp(conf, req);
+									if (send(j, resp.out.c_str(), resp.out.length(), 0) == -1) {
 										std::cout << "ERRORE SEND" << std::endl;
 									}
 								}
