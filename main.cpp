@@ -1,5 +1,6 @@
 #include "config/conf_parsing.hpp"
 #include "studio_socket/Request.hpp"
+#include "studio_socket/Response.hpp"
 void    test_config()
 {
     config  info;
@@ -36,9 +37,15 @@ void    test_config()
     }
 }
 
-int main()
+void request_test()
 {
     std::string req = "POST /cgi-bin/process.cgi HTTP/1.1\nUser-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)\nHost: www.tutorialspoint.com\nContent-Type: text/xml; charset=utf-8\nContent-Length: 600\nAccept-Language: en-us\nAccept-Encoding: gzip, deflate\nConnection: Keep-Alive\n\n<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<string xmlns=\"http://clearforest.com/\">string</string>";
     Request r((char *)(req.c_str()));
     r.print_request();
+}
+
+int main()
+{
+    Response tmp;
+
 }

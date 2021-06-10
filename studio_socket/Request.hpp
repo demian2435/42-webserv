@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aduregon <aduregon@42.fr>                  +#+  +:+       +#+        */
+/*   By: forsili <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/09 18:54:55 by aduregon         ###   ########.fr       */
+/*   Updated: 2021/06/10 10:01:20 by forsili          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 
 class Request
 {
-private:
+public:
 	std::string		method;
 	std::string		method_path;
 	std::string		http_version;
@@ -148,7 +148,7 @@ public:
 		this->user_agent = "";
 		this->upgrade = "";
 		this->via = "";
-		this->warning = "";
+		this->warning = "";https://github.com/demian2435/42-webserv.git
 		this->host = "";
 		this->connection = "keep-alive";
 		this->referer = "";
@@ -624,132 +624,132 @@ public:
 
 	void	print_request()
 	{
-	//	std::string		method;
-	if (this->method.compare(""))
-		std::cout << this->method << " ";
-	// std::string		method_path;
-	if (this->method_path.compare(""))
-		std::cout << this->method_path << " ";
-	// std::string		http_version;
-	if (this->http_version.compare(""))
-		std::cout << this->http_version << std::endl;
-	// std::string		a_im;
-	if (this->a_im.compare(""))
-		std::cout << this->a_im << std::endl;
-	// std::string		accept;
-	if (this->accept.compare(""))
-		std::cout << this->accept << std::endl;
-	// std::string		accept_charset;
-	if (this->accept_charset.compare(""))
-		std::cout << this->accept_charset << std::endl;
-	// std::string		accept_encoding;
-	if (this->accept_encoding.compare(""))
-		std::cout << this->accept_encoding << std::endl;
-	// std::string		accept_language;
-	if (this->accept_language.compare(""))
-		std::cout << this->accept_language << std::endl;
-	// std::string		authorization;
-	if (this->authorization.compare(""))
-		std::cout << this->authorization << std::endl;
-	// std::string		cache_control;
-	if (this->cache_control.compare(""))
-		std::cout << this->cache_control << std::endl;
-	// std::string		content_encoding;
-	if (this->content_encoding.compare(""))
-		std::cout << this->content_encoding << std::endl;
-	// int				content_length;
-	if (this->content_length != 0)
-		std::cout << this->content_length << std::endl;
-	// std::string		content_type;
-	if (this->content_type.compare(""))
-		std::cout << this->content_type << std::endl;
-	// std::string		cookie;
-	if (this->cookie.compare(""))
-		std::cout << this->cookie << std::endl;
-	// std::string		date;
-	if (this->date.compare(""))
-		std::cout << this->date << std::endl;
-	// std::string		expect;
-	if (this->expect.compare(""))
-		std::cout << this->expect << std::endl;
-	// std::string		forwarded;
-	if (this->forwarded.compare(""))
-		std::cout << this->forwarded << std::endl;
-	// std::string		from;
-	if (this->from.compare(""))
-		std::cout << this->from << std::endl;
-	// std::string		http2_settings;
-	if (this->http2_settings.compare(""))
-		std::cout << this->http2_settings << std::endl;
-	// std::string		if_match;
-	if (this->if_match.compare(""))
-		std::cout << this->if_match << std::endl;
-	// std::string		if_modified_since;
-	if (this->if_modified_since.compare(""))
-		std::cout << this->if_modified_since << std::endl;
-	// std::string		if_none_match;
-	if (this->if_none_match.compare(""))
-		std::cout << this->if_none_match << std::endl;
-	// std::string		if_range;
-	if (this->if_range.compare(""))
-		std::cout << this->if_range << std::endl;
-	// std::string		if_unmodified_since;
-	if (this->if_unmodified_since.compare(""))
-		std::cout << this->if_unmodified_since << std::endl;
-	// std::string		max_forwards;
-	if (this->max_forwards.compare(""))
-		std::cout << this->max_forwards << std::endl;
-	// std::string		origin;
-	if (this->origin.compare(""))
-		std::cout << this->origin << std::endl;
-	// std::string		pragma;
-	if (this->pragma.compare(""))
-		std::cout << this->pragma << std::endl;
-	// std::string		prefer;
-	if (this->prefer.compare(""))
-		std::cout << this->prefer << std::endl;
-	// std::string		proxy_authorization;
-	if (this->proxy_authorization.compare(""))
-		std::cout << this->proxy_authorization << std::endl;
-	// std::string		range;
-	if (this->range.compare(""))
-		std::cout << this->range << std::endl;
-	// std::string		te;
-	if (this->te.compare(""))
-		std::cout << this->te << std::endl;
-	// std::string		trailer;
-	if (this->trailer.compare(""))
-		std::cout << this->trailer << std::endl;
-	// std::string		transfer_encoding;
-	if (this->transfer_encoding.compare(""))
-		std::cout << this->transfer_encoding << std::endl;
-	// std::string		user_agent;
-	if (this->user_agent.compare(""))
-		std::cout << this->user_agent << std::endl;
-	// std::string		upgrade;
-	if (this->upgrade.compare(""))
-		std::cout << this->upgrade << std::endl;
-	// std::string		via;
-	if (this->via.compare(""))
-		std::cout << this->via << std::endl;
-	// std::string		warning;
-	if (this->warning.compare(""))
-		std::cout << this->warning << std::endl;
-	// std::string		host;
-	if (this->host.compare(""))
-		std::cout << this->host << std::endl;
-	// std::string		connection;
-	if (this->connection.compare(""))
-		std::cout << this->connection << std::endl;
-	// std::string		referer;
-	if (this->referer.compare(""))
-		std::cout << this->referer << std::endl;
-	// std::string		path;
-	if (this->path.compare(""))
-		std::cout << this->path << std::endl;
-	// std::string		body;
-	if (this->body.compare(""))
-		std::cout << std::endl << this->body << std::endl;
+		//	std::string		method;
+		if (this->method.compare(""))
+			std::cout << this->method << " ";
+		// std::string		method_path;
+		if (this->method_path.compare(""))
+			std::cout << this->method_path << " ";
+		// std::string		http_version;
+		if (this->http_version.compare(""))
+			std::cout << this->http_version << std::endl;
+		// std::string		a_im;
+		if (this->a_im.compare(""))
+			std::cout << this->a_im << std::endl;
+		// std::string		accept;
+		if (this->accept.compare(""))
+			std::cout << this->accept << std::endl;
+		// std::string		accept_charset;
+		if (this->accept_charset.compare(""))
+			std::cout << this->accept_charset << std::endl;
+		// std::string		accept_encoding;
+		if (this->accept_encoding.compare(""))
+			std::cout << this->accept_encoding << std::endl;
+		// std::string		accept_language;
+		if (this->accept_language.compare(""))
+			std::cout << this->accept_language << std::endl;
+		// std::string		authorization;
+		if (this->authorization.compare(""))
+			std::cout << this->authorization << std::endl;
+		// std::string		cache_control;
+		if (this->cache_control.compare(""))
+			std::cout << this->cache_control << std::endl;
+		// std::string		content_encoding;
+		if (this->content_encoding.compare(""))
+			std::cout << this->content_encoding << std::endl;
+		// int				content_length;
+		if (this->content_length != 0)
+			std::cout << this->content_length << std::endl;
+		// std::string		content_type;
+		if (this->content_type.compare(""))
+			std::cout << this->content_type << std::endl;
+		// std::string		cookie;
+		if (this->cookie.compare(""))
+			std::cout << this->cookie << std::endl;
+		// std::string		date;
+		if (this->date.compare(""))
+			std::cout << this->date << std::endl;
+		// std::string		expect;
+		if (this->expect.compare(""))
+			std::cout << this->expect << std::endl;
+		// std::string		forwarded;
+		if (this->forwarded.compare(""))
+			std::cout << this->forwarded << std::endl;
+		// std::string		from;
+		if (this->from.compare(""))
+			std::cout << this->from << std::endl;
+		// std::string		http2_settings;
+		if (this->http2_settings.compare(""))
+			std::cout << this->http2_settings << std::endl;
+		// std::string		if_match;
+		if (this->if_match.compare(""))
+			std::cout << this->if_match << std::endl;
+		// std::string		if_modified_since;
+		if (this->if_modified_since.compare(""))
+			std::cout << this->if_modified_since << std::endl;
+		// std::string		if_none_match;
+		if (this->if_none_match.compare(""))
+			std::cout << this->if_none_match << std::endl;
+		// std::string		if_range;
+		if (this->if_range.compare(""))
+			std::cout << this->if_range << std::endl;
+		// std::string		if_unmodified_since;
+		if (this->if_unmodified_since.compare(""))
+			std::cout << this->if_unmodified_since << std::endl;
+		// std::string		max_forwards;
+		if (this->max_forwards.compare(""))
+			std::cout << this->max_forwards << std::endl;
+		// std::string		origin;
+		if (this->origin.compare(""))
+			std::cout << this->origin << std::endl;
+		// std::string		pragma;
+		if (this->pragma.compare(""))
+			std::cout << this->pragma << std::endl;
+		// std::string		prefer;
+		if (this->prefer.compare(""))
+			std::cout << this->prefer << std::endl;
+		// std::string		proxy_authorization;
+		if (this->proxy_authorization.compare(""))
+			std::cout << this->proxy_authorization << std::endl;
+		// std::string		range;
+		if (this->range.compare(""))
+			std::cout << this->range << std::endl;
+		// std::string		te;
+		if (this->te.compare(""))
+			std::cout << this->te << std::endl;
+		// std::string		trailer;
+		if (this->trailer.compare(""))
+			std::cout << this->trailer << std::endl;
+		// std::string		transfer_encoding;
+		if (this->transfer_encoding.compare(""))
+			std::cout << this->transfer_encoding << std::endl;
+		// std::string		user_agent;
+		if (this->user_agent.compare(""))
+			std::cout << this->user_agent << std::endl;
+		// std::string		upgrade;
+		if (this->upgrade.compare(""))
+			std::cout << this->upgrade << std::endl;
+		// std::string		via;
+		if (this->via.compare(""))
+			std::cout << this->via << std::endl;
+		// std::string		warning;
+		if (this->warning.compare(""))
+			std::cout << this->warning << std::endl;
+		// std::string		host;
+		if (this->host.compare(""))
+			std::cout << this->host << std::endl;
+		// std::string		connection;
+		if (this->connection.compare(""))
+			std::cout << this->connection << std::endl;
+		// std::string		referer;
+		if (this->referer.compare(""))
+			std::cout << this->referer << std::endl;
+		// std::string		path;
+		if (this->path.compare(""))
+			std::cout << this->path << std::endl;
+		// std::string		body;
+		if (this->body.compare(""))
+			std::cout << std::endl << this->body << std::endl;
 	}
 };
 
