@@ -74,6 +74,9 @@ public:
 			return (-1);
 		}
 		// Settiamo il socket come NONBLOCK
+		// F_SETFL significa che vogliamo settare una flag
+		// O_NONBLOCK significa che invece di bloccarsi il socket torna -1
+		// cosi da reinviare la domanda a palla di fuoco, finché non si sblocca
 		fcntl(listener, F_SETFL, O_NONBLOCK);
 
 		// Impostiamo che il socket puo riutilizzare gli address
