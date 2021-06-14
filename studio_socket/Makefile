@@ -6,7 +6,7 @@
 #    By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/04/23 11:15:19 by dmalori           #+#    #+#              #
-#    Updated: 2021/06/14 12:35:12 by dmalori          ###   ########.fr        #
+#    Updated: 2021/06/14 12:36:25 by dmalori          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -117,7 +117,7 @@ runTelnet	:	all
 				@telnet localhost 8080
 else
 run			:	all
-				open -a Terminal ./$(NAME)
+				@open -a Terminal ./$(NAME)
 endif
 
 .phony		:	all re clean fclean run
