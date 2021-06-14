@@ -6,7 +6,7 @@
 /*   By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/07 09:43:52 by forsili           #+#    #+#             */
-/*   Updated: 2021/06/14 11:08:19 by dmalori          ###   ########.fr       */
+/*   Updated: 2021/06/14 14:25:41 by dmalori          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -514,9 +514,9 @@ class   config{
                         while(i < 3)
                         {
                             if (ft_isdigit(argv[i]))
-                                this->host = std::string(argv[i]);
-                            else
                                 this->port = std::string(argv[i]);
+                            else
+                                this->host = std::string(argv[i]);
                             i++;
                         }
                     }
@@ -568,7 +568,7 @@ class   config{
             this->error_pages = errorP;
         }        
     public:
-        config(std::string _path = "./config/webserv.conf")
+        config(std::string _path = "webserv.conf")
         {
             std::string path = _path;
             std::string buffer;
