@@ -63,7 +63,7 @@ public:
 		fdTot = -1;
 		for (int i = 0; i < BUFFER_SIZE; i++)
 			buff[i] = 0;
-		conf = Config();
+		conf = Config("webserv.conf");
 		yes = 1;
 		max_connections = 10;
 		timeout = 30;
