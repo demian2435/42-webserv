@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: forsili <marvin@42.fr>                     +#+  +:+       +#+        */
+/*   By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/10 13:32:02 by forsili          ###   ########.fr       */
+/*   Updated: 2021/06/14 15:56:45 by dmalori          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -151,7 +151,7 @@ public:
 		this->user_agent = "";
 		this->upgrade = "";
 		this->via = "";
-		this->warning = "";https://github.com/demian2435/42-webserv.git
+		this->warning = ""; //https://github.com/demian2435/42-webserv.git
 		this->host = "";
 		this->connection = "";
 		this->referer = "";
@@ -680,6 +680,7 @@ public:
 		}
 		else
 			this->path = this->method_path;
+		std::cout << RED << this->path << RESET << std::endl;
 		//int i = 0;
 		//while (this->path_list.substr(i, this->path.find("/")))
 		//{

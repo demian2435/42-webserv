@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: forsili <marvin@42.fr>                     +#+  +:+       +#+        */
+/*   By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/10 09:47:56 by forsili           #+#    #+#             */
-/*   Updated: 2021/06/10 13:30:53 by forsili          ###   ########.fr       */
+/*   Updated: 2021/06/14 16:00:38 by dmalori          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,16 +39,17 @@ class Response
 		std::string	read_path(std::string path, int code)
 		{
 			//std::cout << path;
+			std::cout << YELLOW << path << RESET << std::endl;
 			std::ifstream	myfile(path);
 			std::string		buff;
 			std::string		out;
 
 			if (code == 200)
-				this->intestation = this->request.http_version + " 200 OK";
+				this->intestation = "HTTP/1.1 200 OK";
 			else if (code == 404)
-				this->intestation = this->request.http_version + " 404 NOT FOUND";
+				this->intestation = "HTTP/1.1 404 NOT FOUND";
 			else if (code == 400)
-				this->intestation = this->request.http_version + " 400 BAD REQUEST";
+				this->intestation = "HTTP/1.1 400 BAD REQUEST";
 
 			if (myfile.is_open())
 			{
@@ -80,7 +81,7 @@ class Response
 		{
 			std::list<location>::iterator	it(c.locations.begin());
 			std::list<std::string>::iterator	index;
-			int i = 0;
+			size_t i = 0;
 			
 			if (r.error)
 			{

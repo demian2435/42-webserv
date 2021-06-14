@@ -51,23 +51,44 @@ private:
 	struct timeval s_timeout;
 	// timeout in secondi per il server
 	int timeout;
-	// variabile che gestisce il main loop
+	// variabile del while per il main loop
 	bool play_loop;
 
 	//----------------------PREPARAZIONE----------------------------//
 public:
-	Server(std::string _conf, std::string _ip = "127.0.0.1", int _port = 8080, int _max_connections = 9999, int _timeout = 5)
+	Server(std::string _path = "webserv.conf")
 	{
 		play_loop = true;
-		conf = config(_conf);
+		conf = config(_path);
 		fdTot = -1;
 		for (int i = 0; i < BUFFER_SIZE; i++)
 			buff[i] = 0;
 		yes = 1;
+		max_connections = 9999;
+		timeout = 30;
+		
+		select_port = std::stoi(conf.port);
+		select_ip = conf.host;
+
+		// Azzeriamo i set
+		FD_ZERO(&temp_fd);
+		FD_ZERO(&base_fd);
+
+		setup();
+	};
+
+	Server(std::string _ip, int _port)
+	{
+		play_loop = true;
+		fdTot = -1;
+		for (int i = 0; i < BUFFER_SIZE; i++)
+			buff[i] = 0;
+		yes = 1;
+		max_connections = 9999;
+		timeout = 30;
+		
 		select_port = _port;
 		select_ip = _ip;
-		max_connections = 9999;
-		timeout = 5;
 
 		// Azzeriamo i set
 		FD_ZERO(&temp_fd);
@@ -134,7 +155,8 @@ public:
 		FD_SET(listener, &base_fd);
 		// Inizializziamo l'fdTot con il valore FD più alto attualmente e poiche abbiamo solo
 		// listener questo corrispponderà esattamente a listener
-		fdTot = listener;
+		if (listener > fdTot)
+			fdTot = listener;
 
 		return (1);
 	}
