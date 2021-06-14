@@ -9,8 +9,8 @@
 #include <string>
 #include <fcntl.h>
 #include <arpa/inet.h>
-#include "conf_parsing.hpp"
-#include "Response.hpp"
+#include <vector>
+#include "Config.hpp"
 #include "Request.hpp"
 #define BUFFER_SIZE 1024
 
@@ -18,7 +18,7 @@ class Server
 {
 private:
 	//---------------VARIABILI----------------//
-	config conf;
+	Config conf;
 	// Contenitore per i file descriptor che arriveranno
 	fd_set temp_fd;
 	// Contenitore di backup, cosi da controllare le differenze nel tempo
@@ -56,27 +56,6 @@ private:
 
 	//----------------------PREPARAZIONE----------------------------//
 public:
-	Server(std::string _path = "webserv.conf")
-	{
-		play_loop = true;
-		conf = config(_path);
-		fdTot = -1;
-		for (int i = 0; i < BUFFER_SIZE; i++)
-			buff[i] = 0;
-		yes = 1;
-		max_connections = 9999;
-		timeout = 30;
-		
-		select_port = std::stoi(conf.port);
-		select_ip = conf.host;
-
-		// Azzeriamo i set
-		FD_ZERO(&temp_fd);
-		FD_ZERO(&base_fd);
-
-		setup();
-	};
-
 	Server(std::string _ip, int _port)
 	{
 		play_loop = true;
@@ -84,7 +63,7 @@ public:
 		for (int i = 0; i < BUFFER_SIZE; i++)
 			buff[i] = 0;
 		yes = 1;
-		max_connections = 9999;
+		max_connections = 10;
 		timeout = 30;
 		
 		select_port = _port;
@@ -247,9 +226,10 @@ public:
 							std::cout << std::endl;
 							Request req(buff);
 							// Mandiamo la risposta al client
-							Response resp(conf, req);
-							std::cout << GREEN << resp.out << RESET << std::endl;
-							if (send(i, resp.out.c_str(), resp.out.length(), 0) == -1)
+							// Response resp(conf, req);
+							//std::cout << GREEN << resp.out << RESET << std::endl;
+							std::string xxx = "HTTP/1.1 404 NOT FOUND\nContent-Type: text/html\nContent-Length: 41\nConnection: keep-alive\n<html><h1>ERROR 404 NOT FOUND</h1></html>";
+							if (send(i, xxx.c_str(), xxx.length(), 0) == -1)
 							{
 								std::cout << "ERRORE SEND" << std::endl;
 							}

@@ -1,6 +1,6 @@
 #include "Config.hpp"
+#include "Response.hpp"
 #include "studio_socket/Request.hpp"
-#include "studio_socket/Response.hpp"
 Config    test_config()
 {
 	Config conf("./studio_socket/webserv.conf");
@@ -37,7 +37,7 @@ Config    test_config()
 
 Request request_test()
 {
-    std::string req = "GET / HTTP/1.1\nHost: localhost:8080\nReferer: http://localhost:8080/ciccio/html\nConnection: keep-alive\n\n";
+    std::string req = "GET /prova HTTP/1.1\nHost: localhost:8080\nConnection: keep-alive\n\n";
     Request r((char *)(req.c_str()));
     r.print_request();
     return r;
@@ -46,12 +46,12 @@ Request request_test()
 int main()
 {
 	// std::string str = "ciao belol beololvoflvc";
-	test_config();
-    // config c;
-    // Request r;
-    // c = test_config();
-    // r = request_test();
-    // Response tmp(c, r);
-    // std::cout << tmp.out;
+	//test_config();
+     Config c("./studio_socket/webserv.conf");
+     Request r;
+     //c = test_config();
+     r = request_test();
+     Response tmp(c.server[0], r);
+     std::cout << tmp.out;
 
 }

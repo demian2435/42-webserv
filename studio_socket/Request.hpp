@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+        */
+/*   By: aduregon <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/14 15:56:45 by dmalori          ###   ########.fr       */
+/*   Updated: 2021/06/14 18:36:11 by aduregon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,6 @@
 #include <iostream>
 #include <string>
 #include <stdlib.h>
-#include "conf_parsing.hpp"
 
 class Request
 {
@@ -671,15 +670,7 @@ public:
 			this->error = true;
 			return ;
 		}
-		if (this->referer.compare(""))
-		{
-			std::list<std::string> list = tokenize(this->referer, this->host);
-			std::list<std::string>::iterator it(list.end());
-			it--;
-			this->path = *it;
-		}
-		else
-			this->path = this->method_path;
+		this->path = this->method_path;
 		std::cout << RED << this->path << RESET << std::endl;
 		//int i = 0;
 		//while (this->path_list.substr(i, this->path.find("/")))

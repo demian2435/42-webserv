@@ -6,7 +6,7 @@
 /*   By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/07 09:43:52 by forsili           #+#    #+#             */
-/*   Updated: 2021/06/14 14:25:41 by dmalori          ###   ########.fr       */
+/*   Updated: 2021/06/14 16:30:27 by dmalori          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -568,7 +568,8 @@ class   config{
             this->error_pages = errorP;
         }        
     public:
-        config(std::string _path = "webserv.conf")
+        config () {};
+        config(std::string _path)
         {
             std::string path = _path;
             std::string buffer;
