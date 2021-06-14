@@ -12,9 +12,7 @@
 #include "conf_parsing.hpp"
 #include "Response.hpp"
 #include "Request.hpp"
-/* COLORS */
-#define GREEN "\033[0;32m"
-#define OFF "\033[0m"
+#define BUFFER_SIZE 1024
 
 class Server
 {
@@ -38,32 +36,48 @@ private:
 	// Variabile che contiene il size dell'address in arrivo
 	socklen_t addrlen;
 	// Buffer data
-	char buff[1024];
+	char buff[BUFFER_SIZE];
 	// Lughezza buffer data
 	int nbytes;
 	// Variabile per impostare il setsockopt
-	int yes = 1;
+	int yes;
 	// porta su cui montare il server
-	int select_port = 8080;
+	int select_port;
 	// indirizzo su cui montare il server
-	std::string select_ip = "127.0.0.1";
+	std::string select_ip;
 	// Massimo connessioni consentite
-	int max_connections = 9999;
+	int max_connections;
 	// Struttura che conterrà le variabili del timeout del server
-	struct timeval timeout;
+	struct timeval s_timeout;
 	// timeout in secondi per il server
-	int t = 5;
+	int timeout;
+	// variabile che gestisce il main loop
+	bool play_loop;
 
 	//----------------------PREPARAZIONE----------------------------//
 public:
-	Server(){};
-
-	int setup()
+	Server(std::string _conf, std::string _ip = "127.0.0.1", int _port = 8080, int _max_connections = 9999, int _timeout = 5)
 	{
+		play_loop = true;
+		conf = config(_conf);
+		fdTot = -1;
+		for (int i = 0; i < BUFFER_SIZE; i++)
+			buff[i] = 0;
+		yes = 1;
+		select_port = _port;
+		select_ip = _ip;
+		max_connections = 9999;
+		timeout = 5;
+
 		// Azzeriamo i set
 		FD_ZERO(&temp_fd);
 		FD_ZERO(&base_fd);
 
+		setup();
+	};
+
+	int setup()
+	{
 		// Generiamo il socket listener
 		// PF_INET = Ip Protocol Family e cioè Internet
 		// SOCK_STREAM = TCP, quindi possiamo utilizzare send() e recv()
@@ -71,7 +85,7 @@ public:
 		if ((listener = socket(PF_INET, SOCK_STREAM, 0)) == -1)
 		{
 			std::cout << "ERRORE SOCKET" << std::endl;
-			return (-1);
+			return (0);
 		}
 		// Settiamo il socket come NONBLOCK
 		// F_SETFL significa che vogliamo settare una flag
@@ -87,7 +101,7 @@ public:
 		if (setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
 		{
 			std::cout << "ERRORE SETSOCKOPT" << std::endl;
-			return (-2);
+			return (0);
 		}
 
 		// Colleghiamo il listener all'indirizzo selezionato ma prima va inizializzata la struct dell'address
@@ -105,7 +119,7 @@ public:
 		if (bind(listener, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) == -1)
 		{
 			std::cout << "ERRORE BIND" << std::endl;
-			return (-3);
+			return (0);
 		}
 
 		// Abilitiamo il socket listener a ricevere connessioni
@@ -113,7 +127,7 @@ public:
 		if (listen(listener, max_connections) == -1)
 		{
 			std::cout << "ERRORE LISTEN" << std::endl;
-			return (-4);
+			return (0);
 		}
 
 		// Aggiungiamo il listener al set di base
@@ -132,12 +146,12 @@ public:
 	// del codice poichè vanno gestiti tutti i flussi in contemporanea
 	int start()
 	{
-		while (true)
+		while (play_loop)
 		{
-			std::cout << GREEN << "SERVER IN ATTESA" << OFF << std::endl;
+			std::cout << GREEN << "SERVER IN ATTESA" << RESET << std::endl;
 			// Impostiamo il timeout del server, poiche ogni volta si azzera
-			timeout.tv_sec = t;
-			timeout.tv_usec = 0;
+			s_timeout.tv_sec = timeout;
+			s_timeout.tv_usec = 0;
 			// Copiamo il set di base dentro al set degli fd da monitorare poichè select lascia nel set solo
 			// gli FD che hannno ricevuto un cambio di stato, eliminando il resto
 			temp_fd = base_fd;
@@ -148,7 +162,7 @@ public:
 			// 3: è il set degli FD che attiveranno Select quando genereranno condizioni di errore
 			// 4: è il timeout, una volta esaurito la funzione ritorna, ovviamente se nulla è cambiato il successivo
 			// codice non produrrà nessun risultato
-			if (select(fdTot + 1, &temp_fd, NULL, NULL, &timeout) == -1)
+			if (select(fdTot + 1, &temp_fd, NULL, NULL, &s_timeout) == -1)
 			{
 				std::cout << "ERRORE SELECT" << std::endl;
 				return (1);
@@ -212,7 +226,7 @@ public:
 							Request req(buff);
 							// Mandiamo la risposta al client
 							Response resp(conf, req);
-							std::cout << GREEN << resp.out << OFF << std::endl;
+							std::cout << GREEN << resp.out << RESET << std::endl;
 							if (send(i, resp.out.c_str(), resp.out.length(), 0) == -1)
 							{
 								std::cout << "ERRORE SEND" << std::endl;
@@ -222,6 +236,16 @@ public:
 				}
 			}
 		}
+		return (0);
+	}
+
+	int restart()
+	{
+		return (0);
+	}
+
+	int stop()
+	{
 		return (0);
 	}
 };

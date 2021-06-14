@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   conf_parsing.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: forsili <marvin@42.fr>                     +#+  +:+       +#+        */
+/*   By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/07 09:43:52 by forsili           #+#    #+#             */
-/*   Updated: 2021/06/10 13:23:41 by forsili          ###   ########.fr       */
+/*   Updated: 2021/06/14 11:08:19 by dmalori          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -568,9 +568,9 @@ class   config{
             this->error_pages = errorP;
         }        
     public:
-        config()
+        config(std::string _path = "./config/webserv.conf")
         {
-            std::string path = "./config/webserv.conf";
+            std::string path = _path;
             std::string buffer;
             std::ifstream myfile(path);
             char    *tmp;

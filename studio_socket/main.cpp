@@ -2,7 +2,6 @@
 
 int main(void)
 {
-    Server s1;
-    s1.setup();
+    Server s1("webserv.conf", "127.0.0.1", 8020);
     s1.start();
 }
