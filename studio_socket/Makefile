@@ -6,7 +6,7 @@
 #    By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/04/23 11:15:19 by dmalori           #+#    #+#              #
-#    Updated: 2021/06/14 12:36:25 by dmalori          ###   ########.fr        #
+#    Updated: 2021/06/14 13:40:16 by dmalori          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -90,10 +90,10 @@ SRC			=	main.cpp
 CC			=	clang++
 CFLAGS		=	#-g -Wall -Wextra -Werror -std=c++98 -pedantic
 
-all			:	$(NAME_S) $(NAME_C)
+all			:	$(NAME)
 
-$(NAME_S)	:	$(SRC)
-				@$(CC) $(CFLAGS) $(SRC) -o $(NAME_S)
+$(NAME)		:	$(SRC)
+				@$(CC) $(CFLAGS) $(SRC) -o $(NAME)
 				@echo $(Green)"*** Compilazione ok"$(Color_Off)
 
 re			:	fclean all
@@ -106,14 +106,10 @@ fclean		:	clean
 
 ifeq ($(OS), Linux)
 run			:	all
-				@gnome-terminal -- ./$(NAME_S)
-				@./$(NAME_C) "TEST 1"
-				@./$(NAME_C) "TEST 2"
-				@./$(NAME_C) "TEST 3"
-				@./$(NAME_C) "ULTIMO TEST"
+				@gnome-terminal -- ./$(NAME)
 
 runTelnet	:	all
-				@gnome-terminal -- ./$(NAME_S)
+				@gnome-terminal -- ./$(NAME)
 				@telnet localhost 8080
 else
 run			:	all

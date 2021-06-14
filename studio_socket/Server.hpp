@@ -64,10 +64,11 @@ public:
 		for (int i = 0; i < BUFFER_SIZE; i++)
 			buff[i] = 0;
 		yes = 1;
-		select_port = 8080;
-		select_ip = "127.0.0.1";
 		max_connections = 9999;
 		timeout = 5;
+		
+		select_port = 8080;
+		select_ip = "127.0.0.1";
 
 		// Azzeriamo i set
 		FD_ZERO(&temp_fd);
