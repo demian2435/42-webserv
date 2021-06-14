@@ -56,16 +56,16 @@ private:
 
 	//----------------------PREPARAZIONE----------------------------//
 public:
-	Server(std::string _conf, std::string _ip = "127.0.0.1", int _port = 8080, int _max_connections = 9999, int _timeout = 5)
+	Server(std::string _path = "webserver.conf")
 	{
 		play_loop = true;
-		conf = config(_conf);
+		conf = config(_path);
 		fdTot = -1;
 		for (int i = 0; i < BUFFER_SIZE; i++)
 			buff[i] = 0;
 		yes = 1;
-		select_port = _port;
-		select_ip = _ip;
+		select_port = 8080;
+		select_ip = "127.0.0.1";
 		max_connections = 9999;
 		timeout = 5;
 
