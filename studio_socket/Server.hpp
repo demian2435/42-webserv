@@ -12,6 +12,7 @@
 #include <vector>
 #include "Config.hpp"
 #include "Request.hpp"
+#include "Response.hpp"
 #define BUFFER_SIZE 1024
 
 class Server
@@ -62,6 +63,7 @@ public:
 		fdTot = -1;
 		for (int i = 0; i < BUFFER_SIZE; i++)
 			buff[i] = 0;
+		conf = Config();
 		yes = 1;
 		max_connections = 10;
 		timeout = 30;
@@ -226,10 +228,9 @@ public:
 							std::cout << std::endl;
 							Request req(buff);
 							// Mandiamo la risposta al client
-							// Response resp(conf, req);
+							Response resp(conf.server[0], req);
 							//std::cout << GREEN << resp.out << RESET << std::endl;
-							std::string xxx = "HTTP/1.1 404 NOT FOUND\nContent-Type: text/html\nContent-Length: 41\nConnection: keep-alive\n<html><h1>ERROR 404 NOT FOUND</h1></html>";
-							if (send(i, xxx.c_str(), xxx.length(), 0) == -1)
+							if (send(i, resp.out.c_str(), resp.out.length(), 0) == -1)
 							{
 								std::cout << "ERRORE SEND" << std::endl;
 							}
