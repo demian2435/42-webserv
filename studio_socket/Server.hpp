@@ -13,6 +13,7 @@
 #include "Config.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
+#include "FileUpload.hpp"
 #define BUFFER_SIZE 25
 
 class Server
@@ -250,6 +251,9 @@ public:
 									std::cout << buff[j];
 								std::cout << std::endl;
 								Request req(buff);
+								std::cout << RED << "BODY: " << req.body << RESET << std::endl;
+								if (req.content_type.compare(""))
+									FileUpload file(req.body);
 								// Mandiamo la risposta al client,
 								// per capire a quale server è stata inviata la richiesta andiamo a vedere nella mappa a quale configurazione equivale la porta della richiesta
 								Response resp(conf.server[port_server.find(req.host_port)->second], req);
@@ -266,6 +270,9 @@ public:
 								std::cout << buff_temp << std::endl;
 								Request req(buff_temp.c_str());
 								buff_temp = "";
+								std::cout << RED << "BODY: " << req.body << RESET << std::endl;
+								if (req.content_type.compare(""))
+									FileUpload file(req.body);
 								// Mandiamo la risposta al client,
 								// per capire a quale server è stata inviata la richiesta andiamo a vedere nella mappa a quale configurazione equivale la porta della richiesta
 								Response resp(conf.server[port_server.find(req.host_port)->second], req);
