@@ -27,7 +27,13 @@ private:
 public:
     CgiManager(void){}
     CgiManager(std::string _ip, int _port, char **_env):pid(0),ip(_ip),port(_port),env(_env){}
-    ~CgiManager() { killah(); }
+    ~CgiManager()
+    {
+        if(pid == -5)
+            return;
+        killah();
+        pid = -5;
+    }
     void        start_php()
     {
         char **cmd = (char **)malloc(sizeof(char *) * 4);
