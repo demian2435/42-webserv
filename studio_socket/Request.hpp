@@ -6,7 +6,7 @@
 /*   By: aduregon <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/14 18:36:11 by aduregon         ###   ########.fr       */
+/*   Updated: 2021/06/15 10:36:39 by aduregon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,8 @@ public:
 	std::string		via;
 	std::string		warning;
 	std::string		host;
+	std::string		host_ip;
+	int				host_port;
 	std::string		connection;
 	std::string		referer;
 	std::string		path;
@@ -105,6 +107,8 @@ public:
 		this->via = "";
 		this->warning = "";
 		this->host = "";
+		this->host_ip = "";
+		this->host_port = 0;
 		this->connection = "keep-alive";
 		this->referer = "";
 		this->path = "";
@@ -114,48 +118,8 @@ public:
 
 	Request(char *r)
 	{
-		this->method = "";
-		this->method_path = "/";
-		this->http_version = "";
-		this->a_im = "";
-		this->accept = "";
-		this->accept_charset = "";
-		this->accept_encoding = "";
-		this->accept_language = "";
-		this->authorization = "";
-		this->cache_control = "";
-		this->content_encoding = "";
 		this->content_length = 0;
-		this->content_type = "";
-		this->cookie = "";
-		this->date = "";
-		this->expect = "";
-		this->forwarded = "";
-		this->from = "";
-		this->http2_settings = "";
-		this->if_match = "";
-		this->if_modified_since = "";
-		this->if_none_match = "";
-		this->if_range = "";
-		this->if_unmodified_since = "";
-		this->max_forwards = "";
-		this->origin = "";
-		this->pragma = "";
-		this->prefer = "";
-		this->proxy_authorization = "";
-		this->range = "";
-		this->te = "";
-		this->trailer = "";
-		this->transfer_encoding = "";
-		this->user_agent = "";
-		this->upgrade = "";
-		this->via = "";
-		this->warning = ""; //https://github.com/demian2435/42-webserv.git
-		this->host = "";
-		this->connection = "";
-		this->referer = "";
-		this->path = "";
-		this->body = "";
+		this->host_port = 0;
 		this->error = false;
 		std::string str = r;
 
@@ -579,11 +543,27 @@ public:
 				while (str[i] != 32)
 					i++;
 				i++;
+				int j = i;
 				while (str[i] != '\n')
 				{
 					this->host += str[i];
 					i++;
 				}
+				while (str[j] && str[j] != ':' && str[j] != '\n')
+				{
+					this->host_ip += str[j];
+					j++;
+				}
+				if (!this->host_ip.compare("localhost"))
+					this->host_ip = "127.0.0.1";
+				j++;
+				std::string tmp;
+				while (str[j] && str[j] != '\n')
+				{
+					tmp += str[j];
+					j++;
+				}
+				this->host_port = std::stoi(tmp);				
 			}
 			else if ( !(str.compare(i, 11, "Connection:")))
 			{
@@ -795,7 +775,11 @@ public:
 			std::cout << this->warning << std::endl;
 		// std::string		host;
 		if (this->host.compare(""))
+		{
 			std::cout << this->host << std::endl;
+			std::cout << RED << this->host_ip << std::endl;
+			std::cout << this->host_port << RESET << std::endl;
+		}
 		// std::string		connection;
 		if (this->connection.compare(""))
 			std::cout << this->connection << std::endl;
