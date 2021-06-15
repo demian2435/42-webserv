@@ -3,6 +3,6 @@
 
 int main(void)
 {
-    Server s1("127.0.0.1", 8080);
+    Server s1("webserv.conf");
     s1.start();
 }
