@@ -6,7 +6,7 @@
 /*   By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/15 16:21:07 by dmalori          ###   ########.fr       */
+/*   Updated: 2021/06/15 19:02:11 by dmalori          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,12 +116,11 @@ public:
 		this->error = false;
 	}
 
-	Request(const char *r)
+	Request(std::string str)
 	{
 		this->content_length = 0;
 		this->host_port = 0;
 		this->error = false;
-		std::string str = r;
 
 		int i = 0;
 		while (str[i])
@@ -580,19 +579,19 @@ public:
 					i++;
 				}
 			}
-			else
+			else if (str[i] == '\n' && str[i + 2] && str[i + 2] == '\n')
 			{
-				if (str[i] == '\n' && str[i + 1] && str[i + 1] == '\n')
-				{
-					i += 2;
-					break;
-				}
-				i++;
+				i += 3;
+				break;
 			}
+			else
+				i++;
 		}
-		while (str[i])
+		int k = 0;
+		while (k < this->content_length)
 		{
 			this->body += str[i];
+			k++;
 			i++;
 		}
 		this->check_request();

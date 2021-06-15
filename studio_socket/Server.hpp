@@ -13,7 +13,8 @@
 #include "Config.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
-#define BUFFER_SIZE 25
+#include "FileUpload.hpp"
+#define BUFFER_SIZE 1000000
 
 class Server
 {
@@ -81,7 +82,7 @@ public:
 		for (size_t i = 0; i < conf.server.size(); i++)
 		{
 			select_port = conf.server[i].port;
-			select_ip = "127.0.0.1";
+			select_ip = "0.0.0.0";
 			// Aggiungo i dati alla mappa cosi da ritrovare il server FD attraverso la porta durante le richieste del client
 			port_server.insert(std::pair<int, int>(select_port, i));
 			if (setup())
@@ -249,11 +250,16 @@ public:
 								for (int j = 0; j < nbytes; j++)
 									std::cout << buff[j];
 								std::cout << std::endl;
-								Request req(buff);
+								buff_temp = buff;
+								Request req(buff_temp);
+								buff_temp = "";
+								//std::cout << RED << "BODY: " << req.body << RESET << std::endl;
+								if (req.content_type.compare(""))
+									FileUpload file(req.body);
 								// Mandiamo la risposta al client,
 								// per capire a quale server è stata inviata la richiesta andiamo a vedere nella mappa a quale configurazione equivale la porta della richiesta
 								Response resp(conf.server[port_server.find(req.host_port)->second], req);
-								std::cout << GREEN << resp.out << RESET << std::endl;
+								//std::cout << GREEN << resp.out << RESET << std::endl;
 								if (send(i, resp.out.c_str(), resp.out.length(), 0) == -1)
 								{
 									std::cout << "ERRORE SEND" << std::endl;
@@ -264,12 +270,15 @@ public:
 								buff_temp.append(buff, 0, nbytes);
 								std::cout << "Messaggio del client: " << i << std::endl;
 								std::cout << buff_temp << std::endl;
-								Request req(buff_temp.c_str());
+								Request req(buff_temp);
+								std::cout << req.body << std::endl;
 								buff_temp = "";
+								if (req.content_type.compare(""))
+									FileUpload file(req.body);
 								// Mandiamo la risposta al client,
 								// per capire a quale server è stata inviata la richiesta andiamo a vedere nella mappa a quale configurazione equivale la porta della richiesta
 								Response resp(conf.server[port_server.find(req.host_port)->second], req);
-								std::cout << GREEN << resp.out << RESET << std::endl;
+								//std::cout << GREEN << resp.out << RESET << std::endl;
 								if (send(i, resp.out.c_str(), resp.out.length(), 0) == -1)
 								{
 									std::cout << "ERRORE SEND" << std::endl;
