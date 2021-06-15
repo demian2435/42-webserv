@@ -14,7 +14,7 @@
 #include "Request.hpp"
 #include "Response.hpp"
 #include "FileUpload.hpp"
-#define BUFFER_SIZE 25
+#define BUFFER_SIZE 100000
 
 class Server
 {
@@ -247,11 +247,11 @@ public:
 							if (buff_temp.size() == 0)
 							{
 								std::cout << "Messaggio del client: " << i << std::endl;
-								for (int j = 0; j < nbytes; j++)
-									std::cout << buff[j];
-								std::cout << std::endl;
+								// for (int j = 0; j < nbytes; j++)
+								// 	std::cout << buff[j];
+								// std::cout << std::endl;
 								Request req(buff);
-								std::cout << RED << "BODY: " << req.body << RESET << std::endl;
+								//std::cout << RED << "BODY: " << req.body << RESET << std::endl;
 								if (req.content_type.compare(""))
 									FileUpload file(req.body);
 								// Mandiamo la risposta al client,
@@ -267,10 +267,10 @@ public:
 							{
 								buff_temp.append(buff, 0, nbytes);
 								std::cout << "Messaggio del client: " << i << std::endl;
-								std::cout << buff_temp << std::endl;
+								// std::cout << buff_temp << std::endl;
 								Request req(buff_temp.c_str());
 								buff_temp = "";
-								std::cout << RED << "BODY: " << req.body << RESET << std::endl;
+								//std::cout << RED << "BODY: " << req.body << RESET << std::endl;
 								if (req.content_type.compare(""))
 									FileUpload file(req.body);
 								// Mandiamo la risposta al client,
