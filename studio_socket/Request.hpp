@@ -6,7 +6,7 @@
 /*   By: aduregon <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/15 11:17:56 by aduregon         ###   ########.fr       */
+/*   Updated: 2021/06/15 12:36:34 by aduregon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -556,14 +556,17 @@ public:
 				}
 				if (!this->host_ip.compare("localhost"))
 					this->host_ip = "127.0.0.1";
-				j++;
-				std::string tmp;
-				while (str[j] && str[j] != '\n')
+				if (str[j] == ':')
 				{
-					tmp += str[j];
 					j++;
+					std::string tmp;
+					while (str[j] && str[j] != '\n')
+					{
+						tmp += str[j];
+						j++;
+					}
+					this->host_port = std::stoi(tmp);				
 				}
-				this->host_port = std::stoi(tmp);				
 			}
 			else if ( !(str.compare(i, 11, "Connection:")))
 			{
