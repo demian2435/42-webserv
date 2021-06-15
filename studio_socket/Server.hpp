@@ -255,7 +255,7 @@ public:
 							std::cout << std::endl;
 							Request req(buff);
 							// Mandiamo la risposta al client,
-							// (per capire a quale server è stat inviata la richiesta andiamo a vedere nella mappa a quale configurazione equivale la portaa della richiesta)
+							// per capire a quale server è stata inviata la richiesta andiamo a vedere nella mappa a quale configurazione equivale la porta della richiesta
 							Response resp(conf.server[port_server.find(8080)->second], req);
 							//std::cout << GREEN << resp.out << RESET << std::endl;
 							if (send(i, resp.out.c_str(), resp.out.length(), 0) == -1)
