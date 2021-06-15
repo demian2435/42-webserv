@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: forsili <forsili@student.42.fr>            +#+  +:+       +#+        */
+/*   By: aduregon <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/15 16:38:43 by forsili          ###   ########.fr       */
+/*   Updated: 2021/06/15 18:12:52 by aduregon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -580,19 +580,19 @@ public:
 					i++;
 				}
 			}
-			else
+			else if (str[i] == '\n' && str[i + 2] && str[i + 2] == '\n')
 			{
-				if (str[i] == '\n' && str[i + 1] && str[i + 1] == '\n')
-				{
-					i += 2;
-					break;
-				}
-				i++;
+				i += 3;
+				break;
 			}
+			else
+				i++;
 		}
-		while (str[i])
+		int k = 0;
+		while (k < this->content_length)
 		{
 			this->body += str[i];
+			k++;
 			i++;
 		}
 		this->check_request();
