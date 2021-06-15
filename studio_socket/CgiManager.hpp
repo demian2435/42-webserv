@@ -31,19 +31,19 @@ public:
     CgiManager(void){}
     CgiManager(char **_env):env(_env){}
     ~CgiManager(){}
-    void       solve_php(char const * path, char const * name)
+    std::string     solve_php(char const * path)
     {
         pid_t pid;
         char **cmd = (char **)malloc(sizeof(char *) * 3);
         cmd[0] = strdup("/usr/bin/php");
         cmd[1] = strdup(path);
         cmd[2] = 0;
-        int fd = open(name, O_RDWR| O_CREAT | O_TRUNC , 01411);
+        int fd = open("__DamSuperCarino__", O_RDWR| O_CREAT | O_TRUNC , 0777);
         pid = fork();
+        std::stringstream buffer;
         if (!pid)
         {
             dup2(fd, STDOUT_FILENO);
-            close(fd);
             execve("/usr/bin/php", cmd, env);
             std::cout << "FATAL ERROR" << std::endl;
             std::cout << errno << std::endl;
@@ -51,16 +51,15 @@ public:
         else
         {
             waitpid(pid, NULL, 0);
-            std::ifstream t(name, std::ifstream::binary);
-            std::stringstream buffer;
+            close(fd);
+            std::ifstream t("__DamSuperCarino__", std::ifstream::in);
             buffer << t.rdbuf();
             t.close();
-            //std::cout << buffer.str() << std::endl;
         }
-        close(fd);
         for (int i = 0; i < 3; i++)
             free(cmd[i]);
         free(cmd);
+        return buffer.str();
     }
 };
 
