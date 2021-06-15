@@ -61,28 +61,7 @@ private:
 
 	//----------------------PREPARAZIONE----------------------------//
 public:
-	Server(std::string _ip, int _port)
-	{
-		play_loop = true;
-		fdTot = -1;
-		for (int i = 0; i < BUFFER_SIZE; i++)
-			buff[i] = 0;
-		conf = Config("webserv.conf");
-		yes = 1;
-		max_connections = 10;
-		timeout = 30;
-		
-		select_port = _port;
-		select_ip = _ip;
-
-		// Azzeriamo i set
-		FD_ZERO(&temp_fd);
-		FD_ZERO(&base_fd);
-
-		setup();
-	};
-
-	Server(std::string _path = "webserv.conf")
+	Server(std::string _path = "./webserv.conf")
 	{
 		play_loop = true;
 		fdTot = -1;
