@@ -1,6 +1,8 @@
-#include "Config.hpp"
-#include "Response.hpp"
-#include "studio_socket/Request.hpp"
+#include "./studio_socket/Config.hpp"
+#include "./studio_socket/Response.hpp"
+#include "./studio_socket/Request.hpp"
+#include "FileUpload.hpp"
+
 Config    test_config()
 {
 	Config conf("./studio_socket/webserv.conf");
@@ -37,9 +39,10 @@ Config    test_config()
 
 Request request_test()
 {
-    std::string req = "GET /prova HTTP/1.1\nHost: localhost:8080\nConnection: keep-alive\n\n";
+    std::string req = "POST / HTTP/1.1\nHost: localhost:8000\nUser-Agent: Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:29.0) Gecko/20100101 Firefox/29.0\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\nAccept-Language: en-US,en;q=0.5\nAccept-Encoding: gzip, deflate\nCookie: __atuvc=34%7C7; permanent=0; _gitlab_session=226ad8a0be43681acf38c2fab9497240; __profilin=p%3Dt; request_method=GET\nConnection: keep-alive\nContent-Type: multipart/form-data; boundary=---------------------------9051914041544843365972754266\nContent-Length: 554\n\n-----------------------------9051914041544843365972754266\nContent-Disposition: form-data; name=\"text\"\n\ntext default\n-----------------------------9051914041544843365972754266\nContent-Disposition: form-data; name=\"file1\"; filename=\"a.txt\"\nContent-Type: text/plain\n\nContent of a.txt.\n\n-----------------------------9051914041544843365972754266\nContent-Disposition: form-data; name=\"file2\"; filename=\"a.html\"\nContent-Type: text/html\n\n<!DOCTYPE html><title>Content of a.html.</title>\n\n-----------------------------9051914041544843365972754266--";
     Request r((char *)(req.c_str()));
-    r.print_request();
+	if (r.content_type.compare(""))
+    	FileUpload(r.body);
     return r;
 }
 
@@ -51,7 +54,7 @@ int main()
      Request r;
      //c = test_config();
      r = request_test();
-     Response tmp(c.server[0], r);
-     std::cout << tmp.out;
+    //  Response tmp(c.server[0], r);
+    //  std::cout << tmp.out;
 
 }
