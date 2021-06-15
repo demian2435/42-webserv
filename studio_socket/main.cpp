@@ -5,4 +5,6 @@
 
 int main(void)
 {
+	Server s;
+	s.start();
 }
