@@ -53,10 +53,14 @@ public:
             free(cmd[i]);
         free(cmd);
     }
-    int         getPid(void)const{return this->pid;}
-    void        killah(void){kill(pid, SIGTERM);}
-    void        setIpPort(std::string );
-
+    int         getPid(void)const
+    {
+        return this->pid;
+    }
+    void        killah(void)
+    {
+        kill(pid, SIGTERM);
+    }
 };
 
 int main(int argc, char **argv, char **env)
