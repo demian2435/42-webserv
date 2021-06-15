@@ -10,63 +10,56 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-//#pragma once
+#pragma once
 #include <iostream>
 #include <unistd.h>
 #include <signal.h>
 #include <string>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <fstream>
 #include <sstream>
+#include <streambuf>
 
 class CgiManager
 {
 private:
-    int         pid;
-    std::string ip;
-    int         port;
     char        **env;
 public:
     CgiManager(void){}
-    CgiManager(std::string _ip, int _port, char **_env):pid(0),ip(_ip),port(_port),env(_env){}
-    ~CgiManager()
+    CgiManager(char **_env):env(_env){}
+    ~CgiManager(){}
+    std::string     solve_php(char const * path)
     {
-        if(pid == -5)
-            return;
-        killah();
-        pid = -5;
-    }
-    void        start_php()
-    {
-        char **cmd = (char **)malloc(sizeof(char *) * 4);
+        pid_t pid;
+        char **cmd = (char **)malloc(sizeof(char *) * 3);
         cmd[0] = strdup("/usr/bin/php");
-        cmd[1] = strdup("-S");
-        std::stringstream ss;
-        ss << ip << ":" << port;
-        cmd[2] = strdup(ss.str().c_str());
-        cmd[3] = 0;
+        cmd[1] = strdup(path);
+        cmd[2] = 0;
+        int fd = open("__DamSuperCarino__", O_RDWR| O_CREAT | O_TRUNC , 0777);
         pid = fork();
+        std::stringstream buffer;
         if (!pid)
         {
+            dup2(fd, STDOUT_FILENO);
             execve("/usr/bin/php", cmd, env);
             std::cout << "FATAL ERROR" << std::endl;
+            std::cout << errno << std::endl;
+        }
+        else
+        {
+            waitpid(pid, NULL, 0);
+            close(fd);
+            std::ifstream t("__DamSuperCarino__", std::ifstream::in);
+            buffer << t.rdbuf();
+            t.close();
         }
         for (int i = 0; i < 3; i++)
             free(cmd[i]);
         free(cmd);
-    }
-    int         getPid(void)const
-    {
-        return this->pid;
-    }
-    void        killah(void)
-    {
-        kill(pid, SIGTERM);
+        return buffer.str();
     }
 };
 
-int main(int argc, char **argv, char **env)
-{
-    CgiManager m("127.0.0.1", 9000, env);
-    m.start_php();
-    std::string c;
-    std::cin >> c;
-}
