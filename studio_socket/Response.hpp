@@ -79,7 +79,8 @@ class Response
 				std::cout << i << std::endl;
 				std::cout << c.location.size() << std::endl;
 			}
-			subpath =c.location[start].root + r.path.substr(c.location[start].path.length(), r.path.size() - c.location[start].path.length());
+			
+			subpath =c.location[start].root + r.path;
 			std::cout << c.location[start].path << "  -0--" << std::endl;
 			
 			if (read_path(subpath, 200) != "")
