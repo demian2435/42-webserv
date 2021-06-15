@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+        */
+/*   By: aduregon <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/14 12:33:40 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/14 17:47:49 by dmalori          ###   ########.fr       */
+/*   Updated: 2021/06/15 11:31:10 by aduregon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,6 +90,7 @@ public:
 	std::string                     path;
     std::string                     root;
     std::vector<std::string>        index;
+	std::vector<std::string>		method;
     //std::list<std::string>          method;
     std::string                     cgi_path;
     std::string                     cgi_extension;
@@ -123,6 +124,11 @@ public:
 				this->cgi_path = parse[1];
 			if (!parse[0].compare("cgi_extension") && parse.size() == 2)
 				this->cgi_extension = parse[1];
+			if (!parse[0].compare("method"))
+			{
+				for (size_t j = 1; j < parse.size(); j++)
+					this->method.push_back(parse[j]);
+			}
 			if (!parse[0].compare("client_max_body_size") && parse.size() == 2)
 			{
 				this->client_max_body_size = std::stof(parse[1].c_str());
