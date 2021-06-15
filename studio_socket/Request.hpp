@@ -6,7 +6,7 @@
 /*   By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/15 14:50:22 by dmalori          ###   ########.fr       */
+/*   Updated: 2021/06/15 16:03:38 by dmalori          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,25 +128,13 @@ public:
 		{
 			if (i == 0)
 			{
-				if (!(str.compare(i, 3, "GET")))
+				while (str[i] != 32)
 				{
-					this->method = "GET";
-					i += 4;
+					this->method +=  str[i];
+					i++;
 				}
-				else if (!(str.compare(i, 4, "POST")))
-				{
-					this->method = "POST";
-					i += 5;
-				}
-				else if (!(str.compare(i, 6, "DELETE")))
-				{
-					this->method = "DELETE";
-					i += 7;
-				}
-				else
-				{
-					std::cout << "\033[33m" << "Invalid method" << "\033[0m" << std::endl;
-				}
+				std::cout << this->method << std::endl;
+				i++;
 				this->method_path.clear();
 				while (str[i] != 32)
 				{
