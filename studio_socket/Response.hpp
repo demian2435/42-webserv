@@ -2,6 +2,7 @@
 
 #include "Config.hpp"
 #include "Request.hpp"
+#include <dirent.h>
 #include <sstream>
 
 #define DEFAULT_404 "<html><h1>ERROR 404 NOT FOUND</h1></html>"
@@ -28,6 +29,7 @@ class Response
 		{
 			for (size_t i = 0; i < c.location.size(); i++)
 			{
+				std::cout << GREEN << "<" << c.location[i].path << ">" << std::endl;
 				if (!c.location[i].path.compare(path))
 					return i;
 			}
@@ -79,7 +81,8 @@ class Response
 				std::cout << i << std::endl;
 				std::cout << c.location.size() << std::endl;
 			}
-			subpath =c.location[start].root + r.path.substr(c.location[start].path.length(), r.path.size() - c.location[start].path.length());
+			
+			subpath =c.location[start].root + r.path;
 			std::cout << c.location[start].path << "  -0--" << std::endl;
 			
 			if (read_path(subpath, 200) != "")
@@ -90,6 +93,47 @@ class Response
 
 		}
 
+		void generate_autoindex(Config_Server c, Request r)
+		{
+			struct dirent *entry;
+			std::string tmp;
+			std::string directory;
+			// posso passarmi direttamente start da take_body?
+			int	start;
+			std::cout << "PPP  <" << r.path << ">" << std::endl;
+			if ((start = this->find_path(r.path, c)) == -1)
+			{
+				start = this->find_path("/", c);
+				directory = c.location[start].root + r.path;
+			}
+			else
+				directory = c.location[start].root;
+
+			this->body = "<!DOCTYPE html><body><h1>Index of " + r.path + "</h1>";
+			// std::cout << RED << c.name << RESET << std::endl;
+			DIR *dir = opendir(directory.c_str());
+			// questo andrebbe controllato prima
+			if (dir == NULL) {
+				this->body = DEFAULT_404;
+				read_path(r.path.c_str(), 404);
+				return;
+			}
+			while ((entry = readdir(dir)) != NULL) {
+				// nasconde file
+				if(entry->d_name[0] == '.')
+					continue ;
+				tmp = entry->d_name;
+				this->body += "<li><a href=\"" + tmp + "\">" + tmp;
+				// mette "/" dopo cartelle
+				if (entry->d_type == DT_DIR)
+					this->body += "/";
+				this->body += "</a></li>";
+				std::cout << RED << tmp << " : " << (entry->d_type == DT_DIR) << std::endl;
+			}
+			this->body += "</body></html>";
+    		closedir(dir);
+		}
+
 	public:
 		std::string	out;
 
@@ -97,6 +141,7 @@ class Response
 		{
 			this->request = r;
 			this->body = take_body(c, r);
+			generate_autoindex(c, r);
 			this->connection =  "Connection: " + r.connection;
 			this->content_len = "Content-Length: " + std::to_string(this->body.length());
 			this->content_type = "Content-Type: text/html";

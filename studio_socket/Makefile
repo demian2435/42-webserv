@@ -6,7 +6,7 @@
 #    By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/04/23 11:15:19 by dmalori           #+#    #+#              #
-#    Updated: 2021/06/14 14:25:28 by dmalori          ###   ########.fr        #
+#    Updated: 2021/06/15 12:20:11 by dmalori          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -88,7 +88,7 @@ OS			=	$(shell uname)
 NAME		=	s
 SRC			=	main.cpp
 CC			=	clang++
-CFLAGS		=	-g -Wall -Wextra -Werror -std=c++98 -pedantic
+CFLAGS		=	#-g -Wall -Wextra -Werror -std=c++98 -pedantic
 
 all			:	$(NAME)
 
@@ -107,10 +107,6 @@ fclean		:	clean
 ifeq ($(OS), Linux)
 run			:	all
 				@gnome-terminal -- ./$(NAME)
-
-runTelnet	:	all
-				@gnome-terminal -- ./$(NAME)
-				@telnet localhost 8080
 else
 run			:	all
 				@open -a Terminal ./$(NAME)
