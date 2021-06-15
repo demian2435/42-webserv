@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   FileUpload.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aduregon <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/15 15:03:15 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/15 17:23:01 by aduregon         ###   ########.fr       */
+/*   Updated: 2021/06/15 19:00:27 by dmalori          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ public:
 
 			if (!file.is_open())
 			{
-				std::ofstream file("./upload/" + name); 
+				std::ofstream file("./upload/" + name);
 				file << body;
 				break ;
 			}

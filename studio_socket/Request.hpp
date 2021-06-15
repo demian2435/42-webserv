@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aduregon <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/15 18:12:52 by aduregon         ###   ########.fr       */
+/*   Updated: 2021/06/15 19:02:11 by dmalori          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,12 +116,11 @@ public:
 		this->error = false;
 	}
 
-	Request(const char *r)
+	Request(std::string str)
 	{
 		this->content_length = 0;
 		this->host_port = 0;
 		this->error = false;
-		std::string str = r;
 
 		int i = 0;
 		while (str[i])
