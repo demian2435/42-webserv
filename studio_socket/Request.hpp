@@ -6,7 +6,7 @@
 /*   By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/15 16:03:38 by dmalori          ###   ########.fr       */
+/*   Updated: 2021/06/15 16:21:07 by dmalori          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,7 +116,7 @@ public:
 		this->error = false;
 	}
 
-	Request(char *r)
+	Request(const char *r)
 	{
 		this->content_length = 0;
 		this->host_port = 0;

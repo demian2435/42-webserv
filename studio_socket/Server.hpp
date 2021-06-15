@@ -13,7 +13,7 @@
 #include "Config.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
-#define BUFFER_SIZE 10000
+#define BUFFER_SIZE 25
 
 class Server
 {
@@ -33,7 +33,7 @@ private:
 	// Client address
 	struct sockaddr_in clientAddr;
 	// Totale fd aperti al momento
-	int fdTot;
+	int fdMax;
 	// Fd del listener
 	int listener;
 	// Nuovo fd accettato dal listner
@@ -58,13 +58,15 @@ private:
 	int timeout;
 	// variabile del while per il main loop
 	bool play_loop;
+	// stringa temporanea per buffer molto grandi
+	std::string buff_temp;
 
 	//----------------------PREPARAZIONE----------------------------//
 public:
 	Server(std::string _path = "./webserv.conf")
 	{
 		play_loop = true;
-		fdTot = -1;
+		fdMax = -1;
 		for (int i = 0; i < BUFFER_SIZE; i++)
 			buff[i] = 0;
 		conf = Config(_path);
@@ -145,10 +147,10 @@ public:
 		FD_SET(listener, &base_fd);
 		// Per multi port server
 		FD_SET(listener, &server_fd);
-		// Inizializziamo l'fdTot con il valore FD più alto attualmente e poiche abbiamo solo
+		// Inizializziamo l'fdMax con il valore FD più alto attualmente e poiche abbiamo solo
 		// listener questo corrispponderà esattamente a listener
-		if (listener > fdTot)
-			fdTot = listener;
+		if (listener > fdMax)
+			fdMax = listener;
 
 		return (0);
 	}
@@ -176,13 +178,13 @@ public:
 			// 3: è il set degli FD che attiveranno Select quando genereranno condizioni di errore
 			// 4: è il timeout, una volta esaurito la funzione ritorna, ovviamente se nulla è cambiato il successivo
 			// codice non produrrà nessun risultato
-			if (select(fdTot + 1, &temp_fd, NULL, NULL, &s_timeout) == -1)
+			if (select(fdMax + 1, &temp_fd, NULL, NULL, &s_timeout) == -1)
 			{
 				std::cout << "ERRORE SELECT" << std::endl;
 				return (1);
 			}
 			// Andiamo a interagire con tutti gli FD contenuti nel SET che hanno ricevuto un cambio di stato
-			for (int i = 0; i <= fdTot; i++)
+			for (int i = 0; i <= fdMax; i++)
 			{
 				// Andiamo a controllare se l'index i è un FD contenuto nel Set che stiamo monitorando
 				if (FD_ISSET(i, &temp_fd))
@@ -202,8 +204,8 @@ public:
 							// Inseriamo il nuovo FD nella lista base
 							FD_SET(newfd, &base_fd);
 							// Se il nuovo FD supera il maxFd attuale lo aggiorniamo
-							if (newfd > fdTot)
-								fdTot = newfd;
+							if (newfd > fdMax)
+								fdMax = newfd;
 							
 							std::cout << "Nuova connessione da " << inet_ntoa(clientAddr.sin_addr) << " sul socket " << newfd << std::endl;
 						}
@@ -212,38 +214,69 @@ public:
 						 // dati da leggere pendenti
 					{
 						// Leggiamo il buffer inviatoci dal client (In caso 0 o -1 chiudiamo la connessione)
-						if ((nbytes = recv(i, buff, sizeof(buff), 0)) <= 0)
+						if ((nbytes = recv(i, buff, sizeof(buff), 0)) == 0 && buff_temp.size() == 0)
 						{
+							buff_temp = "";
 							// Conessione chiusa dal client se 0 size
-							if (nbytes == 0)
-							{
-								std::cout << "Connessione chiusa da socket " << newfd << std::endl;
-							}
-							else
-								std::cout << "ERRORE RECV" << std::endl;
+							std::cout << "Connessione chiusa da socket " << newfd << std::endl;
 							// Chiudiamo la connessione
 							close(i);
 							// Eliminiamo l'FD dal set base
 							FD_CLR(i, &base_fd);
 							// Non abbiamo bisogno di aggiorare maxFd poichè non nuoce controllare qualche fd in più
 						}
+						else if (nbytes == -1)
+						{
+							buff_temp = "";
+							std::cout << "ERRORE RECV" << std::endl;
+							// Chiudiamo la connessione
+							close(i);
+							// Eliminiamo l'FD dal set base
+							FD_CLR(i, &base_fd);
+							// Non abbiamo bisogno di aggiorare maxFd poichè non nuoce controllare qualche fd in più
+						}
+						else if (nbytes == BUFFER_SIZE)
+						{
+							buff_temp.append(buff);
+							continue;
+						}
 						else // Se l lettura è andata a buon fine parsiamo la richiesta e rispondiamo al client
 						{
-							// Stampiamo il buffer del client
-							std::cout << "Messaggio del client: " << i << std::endl;
-							for (int j = 0; j < nbytes; j++)
-								std::cout << buff[j];
-							std::cout << std::endl;
-							Request req(buff);
-							// Mandiamo la risposta al client,
-							// per capire a quale server è stata inviata la richiesta andiamo a vedere nella mappa a quale configurazione equivale la porta della richiesta
-							Response resp(conf.server[port_server.find(req.host_port)->second], req);
-							std::cout << GREEN << resp.out << RESET << std::endl;
-							if (send(i, resp.out.c_str(), resp.out.length(), 0) == -1)
+							// Stampiamo il buffer del client se inferiore al BUFFER_SIZE
+							if (buff_temp.size() == 0)
 							{
-								std::cout << "ERRORE SEND" << std::endl;
+								std::cout << "Messaggio del client: " << i << std::endl;
+								for (int j = 0; j < nbytes; j++)
+									std::cout << buff[j];
+								std::cout << std::endl;
+								Request req(buff);
+								// Mandiamo la risposta al client,
+								// per capire a quale server è stata inviata la richiesta andiamo a vedere nella mappa a quale configurazione equivale la porta della richiesta
+								Response resp(conf.server[port_server.find(req.host_port)->second], req);
+								std::cout << GREEN << resp.out << RESET << std::endl;
+								if (send(i, resp.out.c_str(), resp.out.length(), 0) == -1)
+								{
+									std::cout << "ERRORE SEND" << std::endl;
+								}
+							}
+							else
+							{
+								buff_temp.append(buff, 0, nbytes);
+								std::cout << "Messaggio del client: " << i << std::endl;
+								std::cout << buff_temp << std::endl;
+								Request req(buff_temp.c_str());
+								buff_temp = "";
+								// Mandiamo la risposta al client,
+								// per capire a quale server è stata inviata la richiesta andiamo a vedere nella mappa a quale configurazione equivale la porta della richiesta
+								Response resp(conf.server[port_server.find(req.host_port)->second], req);
+								std::cout << GREEN << resp.out << RESET << std::endl;
+								if (send(i, resp.out.c_str(), resp.out.length(), 0) == -1)
+								{
+									std::cout << "ERRORE SEND" << std::endl;
+								}							
 							}
 						}
+						std::cout << "BYTE LETTI " << nbytes << std::endl;
 					}
 				}
 			}
