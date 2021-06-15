@@ -237,26 +237,28 @@ public:
 						{
 							// Conessione chiusa dal client se 0 size
 							if (nbytes == 0)
+							{
 								std::cout << "Connessione chiusa da socket " << newfd << std::endl;
+								// Chiudiamo la connessione
+								close(i);
+								// Eliminiamo l'FD dal set base
+								FD_CLR(i, &base_fd);
+								// Non abbiamo bisogno di aggiorare maxFd poichè non nuoce controllare qualche fd in più
+							}
 							else
 								std::cout << "ERRORE RECV" << std::endl;
-							// Chiudiamo la connessione
-							close(i);
-							// Eliminiamo l'FD dal set base
-							FD_CLR(i, &base_fd);
-							// Non abbiamo bisogno di aggiorare maxFd poichè non nuoce controllare qualche fd in più
 						}
 						else // Se l lettura è andata a buon fine parsiamo la richiesta e rispondiamo al client
 						{
 							// Stampiamo il buffer del client
-							std::cout << "Messaggio del client " << i << ": ";
+							std::cout << "Messaggio del client: " << i << std::endl;
 							for (int j = 0; j < nbytes; j++)
 								std::cout << buff[j];
 							std::cout << std::endl;
 							Request req(buff);
 							// Mandiamo la risposta al client,
-							// (per capire a quale server è stat inviata la richiesta andiamo a vedere nella mappa a quale configurazione equivale la portaa della richiesta)
-							Response resp(conf.server[port_server.find(8080)->second], req);
+							// per capire a quale server è stata inviata la richiesta andiamo a vedere nella mappa a quale configurazione equivale la porta della richiesta
+							Response resp(conf.server[port_server.find(req.host_port)->second], req);
 							//std::cout << GREEN << resp.out << RESET << std::endl;
 							if (send(i, resp.out.c_str(), resp.out.length(), 0) == -1)
 							{

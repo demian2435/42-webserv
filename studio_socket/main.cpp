@@ -3,13 +3,6 @@
 #include "Config.hpp"
 #include <vector>
 
-// int main(void)
-// {
-//     Server s1("127.0.0.1", 8080);
-//     s1.start();
-// }
-
-int main()
+int main(void)
 {
-
 }
