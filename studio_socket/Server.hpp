@@ -9,7 +9,7 @@
 #include <string>
 #include <fcntl.h>
 #include <arpa/inet.h>
-#include <vector>
+#include <map>
 #include "Config.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
@@ -24,6 +24,10 @@ private:
 	fd_set temp_fd;
 	// Contenitore di backup, cosi da controllare le differenze nel tempo
 	fd_set base_fd;
+	// Contenitore per gestire multiport server
+	fd_set server_fd;
+	// Mappa per ritrovare il server dalla porta
+	std::map<int, int> port_server;
 	// Server address
 	struct sockaddr_in serverAddr;
 	// Client address
@@ -78,6 +82,32 @@ public:
 		setup();
 	};
 
+	Server(std::string _path = "webserv.conf")
+	{
+		play_loop = true;
+		fdTot = -1;
+		for (int i = 0; i < BUFFER_SIZE; i++)
+			buff[i] = 0;
+		conf = Config(_path);
+		yes = 1;
+		max_connections = 10;
+		timeout = 30;
+		
+		// Azzeriamo i set
+		FD_ZERO(&temp_fd);
+		FD_ZERO(&base_fd);
+
+		for (size_t i = 0; i < conf.server.size(); i++)
+		{
+			select_port = conf.server[i].port;
+			select_ip = "127.0.0.1";
+			// Aggiungo i dati alla mappa cosi da ritrovare il server FD attraverso la porta durante le richieste del client
+			port_server.insert(std::pair<int, int>(select_port, i));
+			if (setup())
+				exit(0);
+		}
+	};
+
 	int setup()
 	{
 		// Generiamo il socket listener
@@ -87,7 +117,7 @@ public:
 		if ((listener = socket(PF_INET, SOCK_STREAM, 0)) == -1)
 		{
 			std::cout << "ERRORE SOCKET" << std::endl;
-			return (0);
+			return (1);
 		}
 		// Settiamo il socket come NONBLOCK
 		// F_SETFL significa che vogliamo settare una flag
@@ -103,7 +133,7 @@ public:
 		if (setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
 		{
 			std::cout << "ERRORE SETSOCKOPT" << std::endl;
-			return (0);
+			return (1);
 		}
 
 		// Colleghiamo il listener all'indirizzo selezionato ma prima va inizializzata la struct dell'address
@@ -121,7 +151,7 @@ public:
 		if (bind(listener, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) == -1)
 		{
 			std::cout << "ERRORE BIND" << std::endl;
-			return (0);
+			return (1);
 		}
 
 		// Abilitiamo il socket listener a ricevere connessioni
@@ -129,17 +159,19 @@ public:
 		if (listen(listener, max_connections) == -1)
 		{
 			std::cout << "ERRORE LISTEN" << std::endl;
-			return (0);
+			return (1);
 		}
 
 		// Aggiungiamo il listener al set di base
 		FD_SET(listener, &base_fd);
+		// Per multi port server
+		FD_SET(listener, &server_fd);
 		// Inizializziamo l'fdTot con il valore FD più alto attualmente e poiche abbiamo solo
 		// listener questo corrispponderà esattamente a listener
 		if (listener > fdTot)
 			fdTot = listener;
 
-		return (1);
+		return (0);
 	}
 	//---------------MAIN LOOP----------------//
 	// Multiplazione del I/O: Il server riesce ad accettare nuove connessioni ed a servire quelle già attive
@@ -177,12 +209,12 @@ public:
 				if (FD_ISSET(i, &temp_fd))
 				{
 					// Se è il server, significa che è stato contattato da una nuova connessione
-					if (i == listener)
+					if (FD_ISSET(i, &server_fd))
 					{
 						// Salviamo la grandezza dell'address del client
 						addrlen = sizeof(clientAddr);
 						// Acettiamo la conessione generando un nuovo FD
-						if ((newfd = accept(listener, (struct sockaddr *)&clientAddr, &addrlen)) == -1)
+						if ((newfd = accept(i, (struct sockaddr *)&clientAddr, &addrlen)) == -1)
 						{
 							std::cout << "ERRORE ACCEPT" << std::endl;
 						}
@@ -192,9 +224,8 @@ public:
 							FD_SET(newfd, &base_fd);
 							// Se il nuovo FD supera il maxFd attuale lo aggiorniamo
 							if (newfd > fdTot)
-							{
 								fdTot = newfd;
-							}
+							
 							std::cout << "Nuova connessione da " << inet_ntoa(clientAddr.sin_addr) << " sul socket " << newfd << std::endl;
 						}
 					}
@@ -206,13 +237,9 @@ public:
 						{
 							// Conessione chiusa dal client se 0 size
 							if (nbytes == 0)
-							{
 								std::cout << "Connessione chiusa da socket " << newfd << std::endl;
-							}
 							else
-							{
 								std::cout << "ERRORE RECV" << std::endl;
-							}
 							// Chiudiamo la connessione
 							close(i);
 							// Eliminiamo l'FD dal set base
@@ -227,8 +254,9 @@ public:
 								std::cout << buff[j];
 							std::cout << std::endl;
 							Request req(buff);
-							// Mandiamo la risposta al client
-							Response resp(conf.server[0], req);
+							// Mandiamo la risposta al client,
+							// (per capire a quale server è stat inviata la richiesta andiamo a vedere nella mappa a quale configurazione equivale la portaa della richiesta)
+							Response resp(conf.server[port_server.find(8080)->second], req);
 							//std::cout << GREEN << resp.out << RESET << std::endl;
 							if (send(i, resp.out.c_str(), resp.out.length(), 0) == -1)
 							{
