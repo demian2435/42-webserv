@@ -140,7 +140,7 @@ class Response
 		{
 			this->request = r;
 			this->body = take_body(c, r);
-			generate_autoindex(c, r);
+			//generate_autoindex(c, r);
 			this->connection =  "Connection: " + r.connection;
 			this->content_len = "Content-Length: " + std::to_string(this->body.length());
 			this->content_type = "Content-Type: text/html";
