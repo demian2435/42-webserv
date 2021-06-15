@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aduregon <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: forsili <forsili@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/15 12:36:34 by aduregon         ###   ########.fr       */
+/*   Updated: 2021/06/15 15:05:30 by forsili          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,6 +145,8 @@ public:
 				}
 				else
 				{
+					this->method = "NULL";
+					i+=5;
 					std::cout << "\033[33m" << "Invalid method" << "\033[0m" << std::endl;
 				}
 				this->method_path.clear();

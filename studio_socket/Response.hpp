@@ -6,6 +6,7 @@
 #include <sstream>
 
 #define DEFAULT_404 "<html><h1>ERROR 404 NOT FOUND</h1></html>"
+#define DEFAULT_401 "<html><h1>ERROR 401 UNAUTORIZED</h1></html>"
 #define DEFAULT_400 "<html><h1>ERROR 400 BAD REQUEST</h1></html>"
 
 class Request;
@@ -50,7 +51,7 @@ class Response
 				this->intestation = "HTTP/1.1 404 NOT FOUND";
 			else if (code == 400)
 				this->intestation = "HTTP/1.1 400 BAD REQUEST";
-
+			
 			if (myfile.is_open())
 			{
 				while (getline(myfile, buff))
@@ -60,32 +61,69 @@ class Response
 			return "";
 		}
 
+		bool page_allow(std::vector<std::string> methods, std::string method)
+		{
+			
+			std::cout << "WEILAAA\n";
+			if (methods.size() == 0)
+				return true;
+			std::cout << BLUE << methods.size() << RESET << std::endl;
+			for (int i = 0; i < methods.size(); i++)
+				if (methods[i] == method)
+					return true;
+			return false;
+		}
+
 		std::string	take_body(Config_Server c, Request r)
 		{
+			//Start cerca l indice della path / nel vector location
 			int	start = this->find_path("/", c);
+			//Verra utilizzata per creare path complesse piu avanti (è una temp)
 			std::string	subpath = "";
 			for (size_t i = 0; i < c.location.size(); i++)
 			{
-				std::cout << c.location[i].path << " ------- " << r.path << std::endl;
+				
 				for (size_t k = 0; k < c.location[i].index.size(); k++)
 				{
+
 					if (r.path.find(c.location[i].path) == 0 && r.path.size() == c.location[i].path.size() && read_path(c.location[i].root + c.location[i].index[k], 200) != "")
-						return read_path(c.location[i].root + c.location[i].index[k], 200);
+					{
+						if (this->page_allow(c.location[i].method, r.method))
+							return read_path(c.location[i].root + c.location[i].index[k], 200);
+						else if (read_path(c.error_pages.getPath(401), 401) != "")
+							return	read_path(c.error_pages.getPath(401), 401);
+						else
+							return DEFAULT_401;
+					}
 				}
 				if (r.path.find(c.location[i].path) == 0)
 				{
 					subpath = r.path.substr(c.location[i].path.length(), r.path.size() - c.location[i].path.length());
 					if (read_path(subpath, 200) != "")
-						return read_path(subpath, 200);
+					{
+						if (this->page_allow(c.location[i].method, r.method))
+							return read_path(subpath, 200);
+						else if (read_path(c.error_pages.getPath(401), 401) != "")
+							return	read_path(c.error_pages.getPath(401), 401);
+						else
+							return DEFAULT_401;
+					}
 				}
-				std::cout << i << std::endl;
-				std::cout << c.location.size() << std::endl;
+				//std::cout << i << std::endl;
+				//std::cout << c.location.size() << std::endl;
 			}
 			subpath =c.location[start].root + r.path.substr(c.location[start].path.length(), r.path.size() - c.location[start].path.length());
-			std::cout << c.location[start].path << "  -0--" << std::endl;
+			//std::cout << c.location[start].path << "  -0--" << std::endl;
 			
 			if (read_path(subpath, 200) != "")
-				return read_path(subpath, 200);
+			{
+				if (this->page_allow(c.location[start].method, r.method))
+					return read_path(subpath, 200);
+				else if (read_path(c.error_pages.getPath(401), 401) != "")
+					return	read_path(c.error_pages.getPath(401), 401);
+				else
+					return DEFAULT_401;
+			}
 			if (read_path(c.error_pages.getPath(404), 404) != "")
 				return	read_path(c.error_pages.getPath(404), 404);
 			return DEFAULT_404;
@@ -139,8 +177,8 @@ class Response
 		Response(Config_Server c, Request r) : conf(c)
 		{
 			this->request = r;
+			//generate_autoindex(c, r);
 			this->body = take_body(c, r);
-			generate_autoindex(c, r);
 			this->connection =  "Connection: " + r.connection;
 			this->content_len = "Content-Length: " + std::to_string(this->body.length());
 			this->content_type = "Content-Type: text/html";
