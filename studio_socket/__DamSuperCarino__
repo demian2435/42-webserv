@@ -1,9 +1,2 @@
-<!DOCTYPE html>
-<html>
-<body>
 
-<h1>My first PHP page</h1>
-
-ciao ciao12
-</body>
-</html>
+Parse error: syntax error, unexpected end of file in Command line begin code on line 1
