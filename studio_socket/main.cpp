@@ -2,7 +2,7 @@
 
 int main(void)
 {
-	Server s;
+	Server s("./webservDoppio.conf");
 	s.start();
 }
 

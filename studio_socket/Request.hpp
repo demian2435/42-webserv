@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+        */
+/*   By: forsili <forsili@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/16 14:02:10 by dmalori          ###   ########.fr       */
+/*   Updated: 2021/06/16 18:08:19 by forsili          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -596,7 +596,12 @@ public:
 			i++;
 		}
 		if (this->method_path.compare(""))
-			this->path = this->method_path;
+		{
+			if (this->method_path.length() > 1 && this->method_path[this->method_path.length() - 1] == '/')
+				this->path = this->method_path.substr(0, this->method_path.length() - 1);
+			else
+				this->path = this->method_path;
+		}
 		//this->check_request();
 	}
 
@@ -619,7 +624,8 @@ public:
 	bool	is_valid()
 	{
 		if (this->method.compare("GET") && this->method.compare("POST") &&
-			this->method.compare("DELETE") && this->method.compare("PUT"))
+			this->method.compare("DELETE") && this->method.compare("PUT") &&
+			this->method.compare("HEAD"))
 		{
 			puts("UNO");
 			return false;
@@ -639,6 +645,7 @@ public:
 			puts("CINQUE");
 			return false;
 		}
+		//this->print_request();
 		return true;
 	}
 
