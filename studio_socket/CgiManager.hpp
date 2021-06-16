@@ -33,16 +33,28 @@ public:
     ~CgiManager(){}
     std::string     solve_php(char const * path)
     {
+
+        std::string method = "GET";
+        std::string var = "a";
+        std::string value = "3";
+        std::string s = "$_" + method + "[" + var + "]" + "=" + value;
+        //test dell orso
+
         pid_t pid;
-        char **cmd = (char **)malloc(sizeof(char *) * 3);
+        char **cmd = (char **)malloc(sizeof(char *) * 7);
         cmd[0] = strdup("/usr/bin/php");
-        cmd[1] = strdup(path);
-        cmd[2] = 0;
+        cmd[1] = strdup("-f");
+        cmd[2] = strdup(path);
+        cmd[3] = strdup("-B");
+        cmd[4] = strdup(s.c_str());
+        cmd[5] = 0;
         int fd = open("__DamSuperCarino__", O_RDWR| O_CREAT | O_TRUNC , 0777);
         pid = fork();
         std::stringstream buffer;
         if (!pid)
         {
+            env[10] = strdup("ciao=\"ciao\"");
+            std::cout << env[10] << std::endl;
             dup2(fd, STDOUT_FILENO);
             execve("/usr/bin/php", cmd, env);
             std::cout << "FATAL ERROR" << std::endl;
@@ -56,9 +68,9 @@ public:
             buffer << t.rdbuf();
             t.close();
         }
-        for (int i = 0; i < 3; i++)
-            free(cmd[i]);
-        free(cmd);
+//        for (int i = 0; i < 3; i++)
+//            free(cmd[i]);
+//        free(cmd);
         return buffer.str();
     }
 };
