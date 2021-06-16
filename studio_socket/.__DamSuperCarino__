@@ -1,0 +1,18 @@
+X-Powered-By: PHP/8.0.7
+Content-type: text/html; charset=UTF-8
+
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>My first PHP page</h1>
+
+array(2) {
+  ["www/phpshit_php"]=>
+  string(0) ""
+  ["name"]=>
+  string(4) "ciao"
+}
+
+</body>
+</html>
