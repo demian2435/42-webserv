@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+        */
+/*   By: aduregon <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/15 19:02:11 by dmalori          ###   ########.fr       */
+/*   Updated: 2021/06/16 10:02:44 by aduregon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -594,7 +594,7 @@ public:
 			k++;
 			i++;
 		}
-		this->check_request();
+		//this->check_request();
 	}
 
 	~Request() {}
@@ -613,41 +613,30 @@ public:
 		return out;
 	}
 
-	void	check_request()
+	bool	is_valid()
 	{
-		if (this->method.compare("GET") && this->method.compare("POST") && this->method.compare("DELETE"))
+		if (this->method.compare("GET") && this->method.compare("POST") &&
+			this->method.compare("DELETE") && this->method.compare("PUT"))
 		{
-			this->error = true;
-			return ;
+			return false;
 		}
 		if (!(this->method_path.compare("")))
 		{
-			this->error = true;
-			return ;
+			return false;
 		}
-		if (!(this->http_version.compare("")))
+		if (this->http_version.compare("HTTP/1.1"))
 		{
-			this->error = true;
-			return ;
+			return false;
 		}
 		if (!(this->connection.compare("")))
 		{
-			this->error = true;
-			return ;
+			return false;
 		}
 		if (!(this->host.compare("")))
 		{
-			this->error = true;
-			return ;
+			return false;
 		}
-		this->path = this->method_path;
-		std::cout << RED << this->path << RESET << std::endl;
-		//int i = 0;
-		//while (this->path_list.substr(i, this->path.find("/")))
-		//{
-		//	this->path_list.push_back( "/" + this->path_list.substr(i, this->path.find("/")));
-		//	i++;
-		//}
+		return true;
 	}
 
 	void	print_request()
