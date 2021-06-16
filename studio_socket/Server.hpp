@@ -29,6 +29,8 @@ private:
 	fd_set server_fd;
 	// Mappa per ritrovare il server dalla porta
 	std::map<int, int> port_server;
+	// Mappa per gestire gli over-buffer dei vari client
+	std::map<int, std::string> over_buffer;
 	// Server address
 	struct sockaddr_in serverAddr;
 	// Client address
@@ -219,16 +221,18 @@ public:
 
 						if (nbytes == BUFFER_SIZE)
 						{
-							buff_temp.append(buff, 0 , BUFFER_SIZE);
+							over_buffer[i].append(buff, 0 , BUFFER_SIZE);
+							//buff_temp.append(buff, 0 , BUFFER_SIZE);
 							continue;
 						}
 						else if (nbytes > 0 || buff_temp.size() > 0) // Se l lettura è andata a buon fine parsiamo la richiesta e rispondiamo al client
 						{
-							buff_temp.append(buff, 0, nbytes);
+							over_buffer[i].append(buff, 0 , nbytes);
+							//buff_temp.append(buff, 0, nbytes);
 							std::cout << "Messaggio del client: " << i << std::endl;
-							std::cout << buff_temp << std::endl;
-							Request req(buff_temp);
-							buff_temp = "";
+							std::cout << over_buffer[i] << std::endl;
+							Request req(over_buffer[i]);
+							over_buffer.erase(i);
 							if (req.content_type.compare(""))
 								FileUpload file(req.body);
 							// Mandiamo la risposta al client,
