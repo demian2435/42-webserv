@@ -76,7 +76,7 @@ class Response
 		std::string	take_body(Config_Server c, Request r)
 		{
 			if (!(r.is_valid()))
-				return read_path(c.error_pages.getPath(400), 400);
+				return read_path(c.error_pages.getPath(404), 400);
 			//Start cerca l indice della path / nel vector location
 			int	start = this->find_path("/", c);
 			//Verra utilizzata per creare path complesse piu avanti (è una temp)
