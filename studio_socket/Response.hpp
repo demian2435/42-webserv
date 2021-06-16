@@ -40,10 +40,11 @@ class Response
 		std::string	read_path(std::string path, int code)
 		{
 			//std::cout << path;
-			//std::cout << YELLOW << path << RESET << std::endl;
+			std::cout << YELLOW << path << " - " << code << RESET << std::endl;
 			std::ifstream	myfile(path);
 			std::string		buff;
 			std::string		out;
+			std::string 	tmp;
 
 			if (code == 200)
 				this->intestation = "HTTP/1.1 200 OK";
@@ -56,8 +57,10 @@ class Response
 			else if (code == 405)
 				this->intestation = "HTTP/1.1 405 METHOD NOT ALLOWED";
 			
-			if (myfile.is_open())
+			if (myfile.good())
 			{
+				if ((tmp = generate_autoindex(path)) != "")
+					return (tmp);
 				while (getline(myfile, buff))
 					out += buff + "\n";
 				return out;
@@ -189,46 +192,38 @@ class Response
 			return DEFAULT_404;
 		}
 
-		void generate_autoindex(Config_Server c, Request r)
+		std::string generate_autoindex(std::string directory)
 		{
 			struct dirent *entry;
 			std::string tmp;
-			std::string directory;
-			// posso passarmi direttamente start da take_body?3
-			//NO NON È QUELLO CHE PENSI
-			int	start;
-			//std::cout << "PPP  <" << r.path << ">" << std::endl;
-			if ((start = this->find_path(r.path, c)) == -1)
-			{
-				start = this->find_path("/", c);
-				directory = c.location[start].root + r.path;
-			}
-			else
-				directory = c.location[start].root;
+			std::string abody;
+			std::string link;
 
-			this->body = "<!DOCTYPE html><body><h1>Index of " + r.path + "</h1>";
-			// std::cout << RED << c.name << RESET << std::endl;
+			abody = "<!DOCTYPE html><body><h1>Index of " + request.path + "</h1>";
+			std::cout << RED << request.host << RESET << std::endl;
 			DIR *dir = opendir(directory.c_str());
-			// questo andrebbe controllato prima
-			if (dir == NULL) {
-				this->body = DEFAULT_404;
-				read_path(r.path.c_str(), 404);
-				return;
-			}
-			while ((entry = readdir(dir)) != NULL) {
+			// se non e' una directory esce
+			if (dir == NULL)
+				return ("");
+			while ((entry = readdir(dir)) != NULL) 
+			{
 				// nasconde file
 				if(entry->d_name[0] == '.')
 					continue ;
 				tmp = entry->d_name;
-				this->body += "<li><a href=\"" + tmp + "\">" + tmp;
+				abody += "<li><a href=\"" + request.method_path;
+				if (abody[abody.length() - 1] != '/' )
+					abody += "/";
+				abody += tmp + "\">" + tmp;
 				// mette "/" dopo cartelle
 				if (entry->d_type == DT_DIR)
-					this->body += "/";
-				this->body += "</a></li>";
+					abody += "/";
+				abody += "</a></li>";
 				//std::cout << RED << tmp << " : " << (entry->d_type == DT_DIR) << std::endl;
 			}
-			this->body += "</body></html>";
+			abody += "</body></html>";
     		closedir(dir);
+			return (abody);
 		}
 
 	public:
