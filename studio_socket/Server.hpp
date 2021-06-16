@@ -222,16 +222,19 @@ public:
 						if (nbytes == BUFFER_SIZE)
 						{
 							over_buffer[i].append(buff, 0 , BUFFER_SIZE);
-							//buff_temp.append(buff, 0 , BUFFER_SIZE);
-							continue;
+							//continue;
 						}
-						else if (nbytes > 0 || buff_temp.size() > 0) // Se l lettura è andata a buon fine parsiamo la richiesta e rispondiamo al client
+						else if (nbytes > 0) // Se l lettura è andata a buon fine parsiamo la richiesta e rispondiamo al client
 						{
 							over_buffer[i].append(buff, 0 , nbytes);
-							//buff_temp.append(buff, 0, nbytes);
+						}
+						if (over_buffer[i].find("\r\n\r\n") != std::string::npos)
+						{
+							Request req(over_buffer[i]);
+							if (req.content_length > ( over_buffer[i].size() - over_buffer[i].find("\r\n\r\n") )  )
+								continue;
 							std::cout << "Messaggio del client: " << i << std::endl;
 							std::cout << over_buffer[i] << std::endl;
-							Request req(over_buffer[i]);
 							over_buffer.erase(i);
 							if (req.content_type.compare(""))
 								FileUpload file(req.body);
@@ -243,10 +246,16 @@ public:
 							{
 								std::cout << "ERRORE SEND" << std::endl;
 							}
+							// Conessione chiusa dal client se 0 size
+							std::cout << "Connessione chiusa da socket " << i << std::endl;
+							// Chiudiamo la connessione
+							close(i);
+							// Eliminiamo l'FD dal set base
+							FD_CLR(i, &base_fd);
+							// Non abbiamo bisogno di aggiorare maxFd poichè non nuoce controllare qualche fd in più
 						}
-						else if (nbytes <= 0)
+						if (nbytes <= 0)
 						{
-							buff_temp = "";
 							// Conessione chiusa dal client se 0 size
 							std::cout << "Connessione chiusa da socket " << i << std::endl;
 							// Chiudiamo la connessione
