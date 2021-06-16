@@ -5,9 +5,9 @@
 #include <dirent.h>
 #include <sstream>
 
-#define DEFAULT_404 "<html><h1>ERROR 404 NOT FOUND</h1></html>"
-#define DEFAULT_401 "<html><h1>ERROR 401 UNAUTORIZED</h1></html>"
-#define DEFAULT_400 "<html><h1>ERROR 400 BAD REQUEST</h1></html>"
+#define DEFAULT_404 "<html><h1>ERROR 404 NOT FOUND</h1></html>\n"
+#define DEFAULT_401 "<html><h1>ERROR 405 UNAUTHORIZED</h1></html>\n"
+#define DEFAULT_400 "<html><h1>ERROR 400 BAD REQUEST</h1></html>\n"
 
 class Request;
 
@@ -51,7 +51,7 @@ class Response
 			else if (code == 400)
 				this->intestation = "HTTP/1.1 400 BAD REQUEST";
 			else if (code == 401)
-				this->intestation = "HTTP/1.1 401 UNAUTORIZED";
+				this->intestation = "HTTP/1.1 405 UNAUTHORIZED";
 			
 			if (myfile.is_open())
 			{
