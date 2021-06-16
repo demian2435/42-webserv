@@ -40,7 +40,7 @@ class Response
 		std::string	read_path(std::string path, int code)
 		{
 			//std::cout << path;
-			std::cout << YELLOW << path << RESET << std::endl;
+			//std::cout << YELLOW << path << RESET << std::endl;
 			std::ifstream	myfile(path);
 			std::string		buff;
 			std::string		out;
@@ -65,7 +65,7 @@ class Response
 		{
 			if (methods.size() == 0)
 				return true;
-			std::cout << BLUE << methods.size() << RESET << std::endl;
+			//std::cout << BLUE << methods.size() << RESET << std::endl;
 			for (int i = 0; i < methods.size(); i++)
 				if (methods[i] == method)
 					return true;
@@ -173,7 +173,7 @@ class Response
 			// posso passarmi direttamente start da take_body?3
 			//NO NON È QUELLO CHE PENSI
 			int	start;
-			std::cout << "PPP  <" << r.path << ">" << std::endl;
+			//std::cout << "PPP  <" << r.path << ">" << std::endl;
 			if ((start = this->find_path(r.path, c)) == -1)
 			{
 				start = this->find_path("/", c);
@@ -201,7 +201,7 @@ class Response
 				if (entry->d_type == DT_DIR)
 					this->body += "/";
 				this->body += "</a></li>";
-				std::cout << RED << tmp << " : " << (entry->d_type == DT_DIR) << std::endl;
+				//std::cout << RED << tmp << " : " << (entry->d_type == DT_DIR) << std::endl;
 			}
 			this->body += "</body></html>";
     		closedir(dir);

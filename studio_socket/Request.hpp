@@ -6,7 +6,7 @@
 /*   By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/15 19:02:11 by dmalori          ###   ########.fr       */
+/*   Updated: 2021/06/16 08:48:37 by dmalori          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,7 +132,7 @@ public:
 					this->method +=  str[i];
 					i++;
 				}
-				std::cout << this->method << std::endl;
+				//std::cout << this->method << std::endl;
 				i++;
 				this->method_path.clear();
 				while (str[i] != 32)
@@ -641,7 +641,7 @@ public:
 			return ;
 		}
 		this->path = this->method_path;
-		std::cout << RED << this->path << RESET << std::endl;
+		//std::cout << RED << this->path << RESET << std::endl;
 		//int i = 0;
 		//while (this->path_list.substr(i, this->path.find("/")))
 		//{
