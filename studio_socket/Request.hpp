@@ -6,7 +6,7 @@
 /*   By: aduregon <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/16 10:02:44 by aduregon         ###   ########.fr       */
+/*   Updated: 2021/06/16 10:47:51 by aduregon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,22 +127,22 @@ public:
 		{
 			if (i == 0)
 			{
-				while (str[i] != 32)
+				while (str[i] && str[i] != 32)
 				{
 					this->method +=  str[i];
 					i++;
 				}
-				std::cout << this->method << std::endl;
+				//std::cout << this->method << std::endl;
 				i++;
 				this->method_path.clear();
-				while (str[i] != 32)
+				while (str[i] && str[i] != 32)
 				{
 					this->method_path += str[i];
 					i++;
 				}
-				while (str[i] == 32)
+				while (str[i] && str[i] == 32)
 					i++;
-				while (str[i] != '\n')
+				while (str[i] && str[i] != '\n')
 				{
 					this->http_version += str[i];
 					i++;
@@ -618,22 +618,22 @@ public:
 		if (this->method.compare("GET") && this->method.compare("POST") &&
 			this->method.compare("DELETE") && this->method.compare("PUT"))
 		{
+			puts("UNO");
 			return false;
 		}
 		if (!(this->method_path.compare("")))
 		{
+			puts("DUE");
 			return false;
 		}
-		if (this->http_version.compare("HTTP/1.1"))
+		if (!(this->http_version.compare("HTTP/1.1")))
 		{
-			return false;
-		}
-		if (!(this->connection.compare("")))
-		{
+			puts("TRE");
 			return false;
 		}
 		if (!(this->host.compare("")))
 		{
+			puts("CINQUE");
 			return false;
 		}
 		return true;
