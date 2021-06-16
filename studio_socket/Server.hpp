@@ -14,7 +14,7 @@
 #include "Request.hpp"
 #include "Response.hpp"
 #include "FileUpload.hpp"
-#define BUFFER_SIZE 1000000
+#define BUFFER_SIZE 1024
 
 class Server
 {
@@ -29,6 +29,8 @@ private:
 	fd_set server_fd;
 	// Mappa per ritrovare il server dalla porta
 	std::map<int, int> port_server;
+	// Mappa per gestire gli over-buffer dei vari client
+	std::map<int, std::string> over_buffer;
 	// Server address
 	struct sockaddr_in serverAddr;
 	// Client address
@@ -215,77 +217,53 @@ public:
 						 // dati da leggere pendenti
 					{
 						// Leggiamo il buffer inviatoci dal client (In caso 0 o -1 chiudiamo la connessione)
-						if ((nbytes = recv(i, buff, sizeof(buff), 0)) == 0 && buff_temp.size() == 0)
+						nbytes = recv(i, buff, sizeof(buff), 0);
+
+						if (nbytes == BUFFER_SIZE)
 						{
-							buff_temp = "";
+							over_buffer[i].append(buff, 0 , BUFFER_SIZE);
+							//continue;
+						}
+						else if (nbytes > 0) // Se l lettura è andata a buon fine parsiamo la richiesta e rispondiamo al client
+						{
+							over_buffer[i].append(buff, 0 , nbytes);
+						}
+						if (over_buffer[i].find("\r\n\r\n") != std::string::npos)
+						{
+							Request req(over_buffer[i]);
+							if (req.content_length > ( over_buffer[i].size() - over_buffer[i].find("\r\n\r\n") )  )
+								continue;
+							std::cout << "Messaggio del client: " << i << std::endl;
+							std::cout << over_buffer[i] << std::endl;
+							over_buffer.erase(i);
+							if (req.content_type.compare(""))
+								FileUpload file(req.body);
+							// Mandiamo la risposta al client,
+							// per capire a quale server è stata inviata la richiesta andiamo a vedere nella mappa a quale configurazione equivale la porta della richiesta
+							Response resp(conf.server[port_server.find(req.host_port)->second], req);
+							std::cout << GREEN << resp.out << RESET << std::endl;
+							if (send(i, resp.out.c_str(), resp.out.length(), 0) == -1)
+							{
+								std::cout << "ERRORE SEND" << std::endl;
+							}
 							// Conessione chiusa dal client se 0 size
-							std::cout << "Connessione chiusa da socket " << newfd << std::endl;
+							std::cout << "Connessione chiusa da socket " << i << std::endl;
 							// Chiudiamo la connessione
 							close(i);
 							// Eliminiamo l'FD dal set base
 							FD_CLR(i, &base_fd);
 							// Non abbiamo bisogno di aggiorare maxFd poichè non nuoce controllare qualche fd in più
 						}
-						else if (nbytes == -1)
+						if (nbytes <= 0)
 						{
-							buff_temp = "";
-							std::cout << "ERRORE RECV" << std::endl;
+							// Conessione chiusa dal client se 0 size
+							std::cout << "Connessione chiusa da socket " << i << std::endl;
 							// Chiudiamo la connessione
 							close(i);
 							// Eliminiamo l'FD dal set base
 							FD_CLR(i, &base_fd);
 							// Non abbiamo bisogno di aggiorare maxFd poichè non nuoce controllare qualche fd in più
 						}
-						else if (nbytes == BUFFER_SIZE)
-						{
-							buff_temp.append(buff);
-							continue;
-						}
-						else // Se l lettura è andata a buon fine parsiamo la richiesta e rispondiamo al client
-						{
-							// Stampiamo il buffer del client se inferiore al BUFFER_SIZE
-							if (buff_temp.size() == 0)
-							{
-								std::cout << "Messaggio del client: " << i << std::endl;
-								for (int j = 0; j < nbytes; j++)
-									std::cout << buff[j];
-								std::cout << std::endl;
-								buff_temp = buff;
-								Request req(buff_temp);
-								buff_temp = "";
-								//std::cout << RED << "BODY: " << req.body << RESET << std::endl;
-								if (req.content_type.compare(""))
-									FileUpload file(req.body);
-								// Mandiamo la risposta al client,
-								// per capire a quale server è stata inviata la richiesta andiamo a vedere nella mappa a quale configurazione equivale la porta della richiesta
-								Response resp(conf.server[port_server.find(req.host_port)->second], req);
-								//std::cout << GREEN << resp.out << RESET << std::endl;
-								if (send(i, resp.out.c_str(), resp.out.length(), 0) == -1)
-								{
-									std::cout << "ERRORE SEND" << std::endl;
-								}
-							}
-							else
-							{
-								buff_temp.append(buff, 0, nbytes);
-								std::cout << "Messaggio del client: " << i << std::endl;
-								std::cout << buff_temp << std::endl;
-								Request req(buff_temp);
-								std::cout << req.body << std::endl;
-								buff_temp = "";
-								if (req.content_type.compare(""))
-									FileUpload file(req.body);
-								// Mandiamo la risposta al client,
-								// per capire a quale server è stata inviata la richiesta andiamo a vedere nella mappa a quale configurazione equivale la porta della richiesta
-								Response resp(conf.server[port_server.find(req.host_port)->second], req);
-								//std::cout << GREEN << resp.out << RESET << std::endl;
-								if (send(i, resp.out.c_str(), resp.out.length(), 0) == -1)
-								{
-									std::cout << "ERRORE SEND" << std::endl;
-								}							
-							}
-						}
-						std::cout << "BYTE LETTI " << nbytes << std::endl;
 					}
 				}
 			}

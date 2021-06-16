@@ -30,7 +30,6 @@ class Response
 		{
 			for (size_t i = 0; i < c.location.size(); i++)
 			{
-				std::cout << GREEN << "<" << c.location[i].path << ">" << std::endl;
 				if (!c.location[i].path.compare(path))
 					return i;
 			}
@@ -40,7 +39,7 @@ class Response
 		std::string	read_path(std::string path, int code)
 		{
 			//std::cout << path;
-			std::cout << YELLOW << path << RESET << std::endl;
+			//std::cout << YELLOW << path << RESET << std::endl;
 			std::ifstream	myfile(path);
 			std::string		buff;
 			std::string		out;
@@ -51,6 +50,8 @@ class Response
 				this->intestation = "HTTP/1.1 404 NOT FOUND";
 			else if (code == 400)
 				this->intestation = "HTTP/1.1 400 BAD REQUEST";
+			else if (code == 401)
+				this->intestation = "HTTP/1.1 401 UNAUTORIZED";
 			
 			if (myfile.is_open())
 			{
@@ -65,7 +66,7 @@ class Response
 		{
 			if (methods.size() == 0)
 				return true;
-			std::cout << BLUE << methods.size() << RESET << std::endl;
+			//std::cout << BLUE << methods.size() << RESET << std::endl;
 			for (int i = 0; i < methods.size(); i++)
 				if (methods[i] == method)
 					return true;
@@ -75,6 +76,13 @@ class Response
 		//GENERA IL BODY DI RISPOSTA IN BASE ALLA RICHIESTA EFFETTUATA
 		std::string	take_body(Config_Server c, Request r)
 		{
+			//Set true this to debug
+			bool	debug = false;
+
+			if (!(r.is_valid()) && read_path(c.error_pages.getPath(400), 400) != "")
+				return read_path(c.error_pages.getPath(400), 400);
+			else if (!(r.is_valid()))
+				return DEFAULT_400;
 			//Start cerca l indice della path / nel vector location
 			int	start = this->find_path("/", c);
 			//Verra utilizzata per creare path complesse piu avanti (è una temp)
@@ -93,9 +101,13 @@ class Response
 					//infine controllo se la root (traduzione della path sulla nostra macchina) 
 					//della richiesta può essere letta con successo (esiste quindi
 					//il file che chiediamo)
-					if (r.path.find(c.location[i].path) == 0 && r.path.size() == c.location[i].path.size()
-						&& read_path(c.location[i].root + c.location[i].index[k], 200) != "")
+					if (debug == true)
+						std::cout << "PATH1 : " << c.location[i].root + c.location[i].index[k] << " || " << r.path << " c " << c.location[i].path << std::endl;
+					if (!r.path.compare(c.location[i].path))
+						//&& read_path(c.location[i].root + c.location[i].index[k], 200) != "")
 					{
+						if (debug == true)
+							std::cout << "METODO : |" << r.method << "|" << std::endl;
 						//IF: se la pagina ci è stata richiesta con un method da noi accettato e il file
 						//può essere aperto con successo allora ritorno risposta OK 200 + contenuto file
 						//ELSE IF: controllo se esiste una path per l errore 401 forbidden, se esiste 
@@ -118,6 +130,8 @@ class Response
 					//La subpath non farà altro che concatenare la root della path trovata + il resto della path 
 					//restante ex. /ciccio/pasticcio -> /www/pasticcio 
 					subpath = r.path.substr(c.location[i].path.length(), r.path.size() - c.location[i].path.length());
+					if (debug == true)
+						std::cout << "PATH2 : " << subpath << std::endl;
 					//Vedo se effettivamente è possibile trovare il file alla path generata
 					if (read_path(subpath, 200) != "")
 					{
@@ -126,6 +140,8 @@ class Response
 						//ELSE IF: controllo se esiste una path per l errore 401 forbidden, se esiste 
 						//ritorno risposta 401 + contenuto file
 						//ELSE: in tutti gli altri casi torno una default path
+						if (debug == true)
+							std::cout << "METODO : |" << r.method << "|" << std::endl;
 						if (this->page_allow(c.location[i].method, r.method))
 							return read_path(subpath, 200);
 						else if (read_path(c.error_pages.getPath(401), 401) != "")
@@ -142,6 +158,8 @@ class Response
 			//location "/" + la path della richiesta ex. root = /mimmo path = /ciccio/pasticcio
 			//risultante = /mimmo/ciccio/pasticcio
 			subpath =c.location[start].root + r.path;
+			if (debug == true)
+				std::cout << "PATH3 : " << subpath << std::endl;
 			//se il file esiste alla subpath generata entra nell if
 			if (read_path(subpath, 200) != "")
 			{
@@ -173,7 +191,7 @@ class Response
 			// posso passarmi direttamente start da take_body?3
 			//NO NON È QUELLO CHE PENSI
 			int	start;
-			std::cout << "PPP  <" << r.path << ">" << std::endl;
+			//std::cout << "PPP  <" << r.path << ">" << std::endl;
 			if ((start = this->find_path(r.path, c)) == -1)
 			{
 				start = this->find_path("/", c);
@@ -201,7 +219,7 @@ class Response
 				if (entry->d_type == DT_DIR)
 					this->body += "/";
 				this->body += "</a></li>";
-				std::cout << RED << tmp << " : " << (entry->d_type == DT_DIR) << std::endl;
+				//std::cout << RED << tmp << " : " << (entry->d_type == DT_DIR) << std::endl;
 			}
 			this->body += "</body></html>";
     		closedir(dir);

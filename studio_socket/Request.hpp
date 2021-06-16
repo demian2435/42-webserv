@@ -6,7 +6,7 @@
 /*   By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/15 19:02:11 by dmalori          ###   ########.fr       */
+/*   Updated: 2021/06/16 14:02:10 by dmalori          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,22 +127,23 @@ public:
 		{
 			if (i == 0)
 			{
-				while (str[i] != 32)
+				while (str[i] && str[i] != 32)
 				{
 					this->method +=  str[i];
 					i++;
 				}
-				std::cout << this->method << std::endl;
+				//std::cout << this->method << std::endl;
 				i++;
 				this->method_path.clear();
-				while (str[i] != 32)
+				while (str[i] && str[i] != 32)
 				{
 					this->method_path += str[i];
 					i++;
 				}
-				while (str[i] == 32)
+				std::cout << "PATH: " << this->method_path << std::endl;
+				while (str[i] && str[i] == 32)
 					i++;
-				while (str[i] != '\n')
+				while (str[i] && str[i] != '\n')
 				{
 					this->http_version += str[i];
 					i++;
@@ -594,7 +595,9 @@ public:
 			k++;
 			i++;
 		}
-		this->check_request();
+		if (this->method_path.compare(""))
+			this->path = this->method_path;
+		//this->check_request();
 	}
 
 	~Request() {}
@@ -613,41 +616,30 @@ public:
 		return out;
 	}
 
-	void	check_request()
+	bool	is_valid()
 	{
-		if (this->method.compare("GET") && this->method.compare("POST") && this->method.compare("DELETE"))
+		if (this->method.compare("GET") && this->method.compare("POST") &&
+			this->method.compare("DELETE") && this->method.compare("PUT"))
 		{
-			this->error = true;
-			return ;
+			puts("UNO");
+			return false;
 		}
 		if (!(this->method_path.compare("")))
 		{
-			this->error = true;
-			return ;
+			puts("DUE");
+			return false;
 		}
-		if (!(this->http_version.compare("")))
+		if (!(this->http_version.compare("HTTP/1.1")))
 		{
-			this->error = true;
-			return ;
-		}
-		if (!(this->connection.compare("")))
-		{
-			this->error = true;
-			return ;
+			puts("TRE");
+			return false;
 		}
 		if (!(this->host.compare("")))
 		{
-			this->error = true;
-			return ;
+			puts("CINQUE");
+			return false;
 		}
-		this->path = this->method_path;
-		std::cout << RED << this->path << RESET << std::endl;
-		//int i = 0;
-		//while (this->path_list.substr(i, this->path.find("/")))
-		//{
-		//	this->path_list.push_back( "/" + this->path_list.substr(i, this->path.find("/")));
-		//	i++;
-		//}
+		return true;
 	}
 
 	void	print_request()
