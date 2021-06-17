@@ -30,8 +30,6 @@ private:
 	fd_set server_fd;
 	// Mappa per ritrovare il server dalla porta
 	std::map<int, int> port_server;
-	// Mappa per gestire gli over-buffer dei vari client
-	std::map<int, std::string> over_buffer;
 	// Server address
 	struct sockaddr_in serverAddr;
 	// Client address
@@ -60,8 +58,6 @@ private:
 	struct timeval s_timeout;
 	// timeout in secondi per il server
 	int timeout;
-	// stringa temporanea per buffer molto grandi
-	std::string buff_temp;
 	// mappa dei client attivi
 	std::map<int, Client> client_map;
 
@@ -220,31 +216,29 @@ public:
 					else // Se è Client significa che vuole dirci qualcosa, poichè il set minitora se ci sono
 						 // dati da leggere pendenti
 					{
+						// Per velocizzare mi salvo il client temporaneo in nella variabile c
+						Client c = client_map[i];
 						// Leggiamo il buffer inviatoci dal client (In caso 0 o -1 chiudiamo la connessione)
 						nbytes = recv(i, buff, sizeof(buff), 0);
 
 						if (nbytes > 0) // Se l lettura è andata a buon fine parsiamo la richiesta e rispondiamo al client
 						{
-							client_map[i].appendBuffer(buff, nbytes);
+							c.appendBuffer(buff, nbytes);
 						}
-						if (client_map[i].header_ok() &&  client_map[i].isReady())
+						if (c.header_ok() &&  c.isReady())
 						{
-							//if (req.content_length > ( client_map[i].buffer.size() - client_map[i].buffer.find("\r\n\r\n") )  )
-							//	continue;
-							//if (req.transfer_encoding == "chunked")
-							//	continue;
 							std::cout << "Messaggio del client: " << i << std::endl;
-							std::cout << client_map[i].getHeader() << std::endl;
+							std::cout << c.getHeader() << std::endl;
 							// Mandiamo la risposta al client,
 							// per capire a quale server è stata inviata la richiesta andiamo a vedere nella mappa a quale configurazione equivale la porta della richiesta
-							client_map[i].getResponse(conf);
-							std::cout << GREEN << client_map[i].res.out << RESET << std::endl;
-							if (send(i, client_map[i].res.out.c_str(), client_map[i].res.out.length(), 0) == -1)
+							c.getResponse(conf);
+							std::cout << GREEN << c.res.out << RESET << std::endl;
+							if (send(i, c.res.out.c_str(), c.res.out.length(), 0) == -1)
 							{
 								std::cout << "ERRORE SEND" << std::endl;
 							}
-							if (client_map[i].req.upload && client_map[i].res.res_code == 200)
-								FileUpload file(client_map[i].req.body);
+							if (c.req.upload && c.res.res_code == 200)
+								FileUpload file(c.req.body);
 							std::cout << "Chiudiamo la connessione al socket " << i << std::endl;
 							// Chiudiamo la connessione
 							close(i);
