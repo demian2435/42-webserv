@@ -6,7 +6,7 @@
 /*   By: aduregon <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/17 10:24:29 by aduregon         ###   ########.fr       */
+/*   Updated: 2021/06/17 13:05:45 by aduregon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,14 +16,6 @@
 #include <string>
 #include <stdlib.h>
 #include <vector>
-
-bool		contain_var(std::string str)
-{
-	for (size_t i = 0; i < str.length(); i++)
-		if (str[i] == '?')
-			return true;
-	return false;
-}
 
 class Request
 {
@@ -55,8 +47,9 @@ public:
 	std::string					referer;
 	std::string					path;
 	std::string					body;
-	bool						error;
 	std::vector<std::string>	var;
+	bool						upload;
+	std::string					buff;
 
 public:
 	Request(/* args */)
@@ -88,14 +81,16 @@ public:
 		this->referer = "";
 		this->path = "";
 		this->body = "";
-		this->error = false;
+		this->upload = false;
+		this->buff = "";
 	}
 
 	Request(std::string str)
 	{
 		this->content_length = 0;
 		this->host_port = 0;
-		this->error = false;
+		this->upload = false;
+		this->buff = str;
 
 		int i = 0;
 		while (str[i])
@@ -389,34 +384,6 @@ public:
 
 	~Request() {}
 
-	std::list<std::string> tokenize(std::string s, std::string del = " ")
-	{
-		std::list<std::string> out;
-	    int start = 0;
-	    int end = s.find(del);
-	    while (end != -1) {
-	        out.push_front(s.substr(start, end - start));
-	        start = end + del.size();
-	        end = s.find(del, start);
-	    }
-	    out.push_front(s.substr(start, end - start));
-		return out;
-	}
-
-	std::vector<std::string> tokenize_var(std::string s, std::string del = " ")
-	{
-		std::vector<std::string> out;
-	    int start = 0;
-	    int end = s.find(del);
-	    while (end != -1) {
-	        out.push_back(s.substr(start, end - start));
-	        start = end + del.size();
-	        end = s.find(del, start);
-	    }
-	    out.push_back(s.substr(start, end - start));
-		return out;
-	}
-
 	bool	is_valid()
 	{
 		if (this->method.compare("GET") && this->method.compare("POST") &&
@@ -441,20 +408,71 @@ public:
 			puts("CINQUE");
 			return false;
 		}
-		//this->print_request();
 		return true;
 	}
 
+	std::vector<std::string> tokenize(std::string s, std::string del = " ")
+	{
+		std::vector<std::string> out;
+	    int start = 0;
+	    int end = s.find(del);
+	    while (end != -1) {
+	        out.push_back(s.substr(start, end - start));
+	        start = end + del.size();
+	        end = s.find(del, start);
+	    }
+	    out.push_back(s.substr(start, end - start));
+		return out;
+	}
+
+	bool	contain_var(std::string str)
+	{
+		for (size_t i = 0; i < str.length(); i++)
+			if (str[i] == '?')
+				return true;
+		return false;
+	}
+
+	bool	is_ready() const
+	{
+		if (!(this->method.compare("PUT")) || !(this->method.compare("POST")))
+		{
+			if (this->content_length > 0)
+			{
+				std::cout << this->body.length() << " " << this->content_length << " \n";
+				if (this->body.length() != this->content_length)
+					return false;
+			}
+			else if (!(this->transfer_encoding.compare("chunked")))
+			{
+				if (std::strcmp(this->buff.substr(this->buff.length() - 5).c_str(), "0\r\n\r\n"))
+					return false;
+			}
+		}
+		else
+		{
+			if (std::strcmp(this->buff.substr(this->buff.length() - 4).c_str(), "\r\n\r\n"))
+				return false;
+		}
+		return true;
+	}
+	
 	void	parse_request()
 	{
+		if (!(this->method.compare("PUT")) || !(this->method.compare("POST")))
+		{
+			if ((this->content_length != 0 && this->content_type.compare("")) ||
+				this->transfer_encoding.compare("chunked"))
+				this->upload = true;
+		}
 		if (this->method_path.compare(""))
 		{
-			if (contain_var(this->method_path))
+			if (this->contain_var(this->method_path))
 			{
-				std::vector<std::string> tmp = tokenize_var(this->method_path, "?");
+				std::vector<std::string> tmp = tokenize(this->method_path, "?");
 				this->method_path.clear();
 				this->method_path = tmp[0];
-				tmp = tokenize_var(tmp[1], "&");
+				tmp = tokenize(tmp[1], "&");
 				for (size_t i = 0; i < tmp.size(); i++)
 					this->var.push_back(tmp[i]);
 			}
@@ -463,6 +481,8 @@ public:
 			else
 				this->path = this->method_path;
 		}
+		if (!(this->transfer_encoding.compare(0, 7, "chunked")) && this->transfer_encoding.size() >= 8)
+			this->transfer_encoding.erase(7, this->transfer_encoding.size() - 7);
 	}
 
 	void	print_request()
