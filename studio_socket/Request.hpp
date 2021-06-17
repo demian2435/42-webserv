@@ -6,7 +6,7 @@
 /*   By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/17 14:38:35 by dmalori          ###   ########.fr       */
+/*   Updated: 2021/06/17 15:28:57 by dmalori          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -371,11 +371,9 @@ public:
 			else
 				i++;
 		}
-		int k = 0;
-		while (k < this->content_length)
+		while (str[i])
 		{
 			this->body += str[i];
-			k++;
 			i++;
 		}
 		this->parse_request();
@@ -443,7 +441,7 @@ public:
 				if (this->body.length() != (size_t)this->content_length)
 					return false;
 			}
-			else if (!(this->transfer_encoding.compare("chunked")))
+			else if (!(this->transfer_encoding.compare(0, 7, "chunked")))
 			{
 				if (std::strcmp(this->buff.substr(this->buff.length() - 5).c_str(), "0\r\n\r\n"))
 					return false;
@@ -459,10 +457,13 @@ public:
 	
 	void	parse_request()
 	{
+		if (!(this->transfer_encoding.compare(0, 7, "chunked")) && this->transfer_encoding.size() >= 8)
+			this->transfer_encoding.erase(7, this->transfer_encoding.size() - 7);
+		
 		if (!(this->method.compare("PUT")) || !(this->method.compare("POST")))
 		{
 			if ((this->content_length != 0 && this->content_type.compare("")) ||
-				this->transfer_encoding.compare("chunked"))
+				!(this->transfer_encoding.compare(0, 7, "chunked")))
 				this->upload = true;
 		}
 		if (this->method_path.compare(""))
@@ -481,8 +482,6 @@ public:
 			else
 				this->path = this->method_path;
 		}
-		if (!(this->transfer_encoding.compare(0, 7, "chunked")) && this->transfer_encoding.size() >= 8)
-			this->transfer_encoding.erase(7, this->transfer_encoding.size() - 7);
 	}
 
 	void	print_request()

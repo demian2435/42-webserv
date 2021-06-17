@@ -234,9 +234,9 @@ public:
 							//if (req.transfer_encoding == "chunked")
 							//	continue;
 							std::cout << "Messaggio del client: " << i << std::endl;
-							//std::cout << client_map[i].buffer << std::endl;
-							//if (req.content_type.compare(""))
-							//	FileUpload file(req.body);
+							std::cout << client_map[i].getHeader() << std::endl;
+							//if (client_map[i].req.upload)
+								FileUpload file(client_map[i].req.body);
 							// Mandiamo la risposta al client,
 							// per capire a quale server è stata inviata la richiesta andiamo a vedere nella mappa a quale configurazione equivale la porta della richiesta
 							client_map[i].getResponse(conf);
