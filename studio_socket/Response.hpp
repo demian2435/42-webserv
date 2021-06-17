@@ -59,8 +59,8 @@ class Response
 			
 			if (myfile.good())
 			{
-				//if ((tmp = generate_autoindex(path)) != "")
-					//return (tmp);
+				// if ((tmp = generate_autoindex(path)) != "")
+				// 	return (tmp);
 				while (getline(myfile, buff))
 					out += buff + "\n";
 				return out;
