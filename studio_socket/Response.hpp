@@ -9,6 +9,8 @@
 #define DEFAULT_401 "<html><h1>ERROR 401 UNAUTORIZED</h1></html>\n"
 #define DEFAULT_400 "<html><h1>ERROR 400 BAD REQUEST</h1></html>\n"
 #define DEFAULT_405 "<html><h1>ERROR 405 METHOD NOT ALLOWED</h1></html>\n"
+#define PHP 1
+#define BLA 2
 
 class Request;
 
@@ -26,6 +28,17 @@ class Response
 		std::string	content_type;
 		std::string	connection;
 		std::string	body;
+
+		int extension(std::string path)
+		{
+			if (path.length() < 5)
+				return 0;
+			if (!path.compare(path.length() - 4, 4, ".php"))
+				return (PHP);
+			if (!path.compare(path.length() - 4, 4, ".bla"))
+				return (BLA);
+			return (0);
+		}
 		
 		int	find_path(std::string path, Config_Server c)
 		{
@@ -59,6 +72,12 @@ class Response
 			
 			if (myfile.good())
 			{
+				/*
+				if (extension(path) == PHP)
+					// start php cgi;
+				else if (extension(path) == BLA)
+					// start tester cgi
+				*/
 				if (code == 200 && ai == true && (tmp = generate_autoindex(path)) != "")
 					return (tmp);
 				while (getline(myfile, buff))
