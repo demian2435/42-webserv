@@ -7,13 +7,14 @@ class Client
 {
     public:
     int fd_server;
+    int index_server;
     int fd_client;
     socklen_t addrlen;
 	struct sockaddr_in clientAddr;
     std::string buffer;
 
     Client(){}
-    Client(int _fd_server, int _fd_client, socklen_t _addrlen, struct sockaddr_in _clientAddr) : fd_server(_fd_server), fd_client(_fd_client), addrlen(_addrlen), clientAddr(_clientAddr), buffer("") {}
+    Client(int _fd_server, int _index_server, int _fd_client, socklen_t _addrlen, struct sockaddr_in _clientAddr) : fd_server(_fd_server), index_server(_index_server),fd_client(_fd_client), addrlen(_addrlen), clientAddr(_clientAddr), buffer("") {}
 
     void appendBuffer(const char *new_buffer, int len)
     {

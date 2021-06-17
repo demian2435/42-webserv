@@ -85,14 +85,12 @@ public:
 		{
 			select_port = conf.server[i].port;
 			select_ip = "0.0.0.0";
-			// Aggiungo i dati alla mappa cosi da ritrovare il server FD attraverso la porta durante le richieste del client
-			port_server.insert(std::pair<int, int>(select_port, i));
-			if (setup())
+			if (setup(i))
 				exit(0);
 		}
 	};
 
-	int setup()
+	int setup(int index)
 	{
 		// Generiamo il socket listener
 		// PF_INET = Ip Protocol Family e cioè Internet
@@ -155,6 +153,9 @@ public:
 		if (listener > fdMax)
 			fdMax = listener;
 
+		// Aggiungo i dati alla mappa cosi da ritrovare il server conf attraverso l'FD
+		port_server[listener] = index;
+
 		return (0);
 	}
 	//---------------MAIN LOOP----------------//
@@ -209,7 +210,8 @@ public:
 							// Se il nuovo FD supera il maxFd attuale lo aggiorniamo
 							if (newfd > fdMax)
 								fdMax = newfd;
-							Client c(i, newfd, addrlen, clientAddr);
+
+							Client c(i, port_server[i], newfd, addrlen, clientAddr);
 							client_map[newfd] = c;
 
 							std::cout << "Nuova connessione da " << c.getIp() << " sul socket " << c.fd_client << std::endl;
@@ -238,7 +240,7 @@ public:
 							//	FileUpload file(req.body);
 							// Mandiamo la risposta al client,
 							// per capire a quale server è stata inviata la richiesta andiamo a vedere nella mappa a quale configurazione equivale la porta della richiesta
-							Response resp(conf.server[client_map[i].fd_server], req);
+							Response resp(conf.server[client_map[i].index_server], req);
 							std::cout << GREEN << resp.out << RESET << std::endl;
 							if (send(i, resp.out.c_str(), resp.out.length(), 0) == -1)
 							{

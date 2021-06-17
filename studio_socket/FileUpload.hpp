@@ -6,7 +6,7 @@
 /*   By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/15 15:03:15 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/15 19:00:27 by dmalori          ###   ########.fr       */
+/*   Updated: 2021/06/17 11:04:03 by dmalori          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ public:
  
 		while (1)
 		{
-			long long int time = std::chrono::duration_cast<std::chrono::milliseconds>(p1.time_since_epoch()).count();
+			long int time = std::chrono::duration_cast<std::chrono::milliseconds>(p1.time_since_epoch()).count();
 			name = "file_" + std::to_string(time);
 			std::ifstream file("./upload/" + name);
 
