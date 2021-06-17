@@ -37,7 +37,7 @@ class Response
 			return -1;
 		}
 
-		std::string	read_path(std::string path, int code)
+		std::string	read_path(std::string path, int code, bool ai = false)
 		{
 			//std::cout << path;
 			std::cout << YELLOW << path << " - " << code << RESET << std::endl;
@@ -59,8 +59,8 @@ class Response
 			
 			if (myfile.good())
 			{
-				// if ((tmp = generate_autoindex(path)) != "")
-				// 	return (tmp);
+				if (code == 200 && ai == true && (tmp = generate_autoindex(path)) != "")
+					return (tmp);
 				while (getline(myfile, buff))
 					out += buff + "\n";
 				return out;
@@ -86,6 +86,8 @@ class Response
 		{
 			//Set true this to debug
 			bool	debug = true;
+			// ai = autoindex
+			bool	ai;
 
 			if (!(r.is_valid()) && read_path(c.error_pages.getPath(400), 400) != "")
 				return read_path(c.error_pages.getPath(400), 400);
@@ -99,6 +101,7 @@ class Response
 			//alla ricerca della location che corrisponde alla path della richiesta
 			for (size_t i = 0; i < c.location.size(); i++)
 			{
+				ai = c.location[i].autoindex;
 				//Ciclo all' interno della lista di index parsata dal config file 
 				//line condfig ex. index index.html index.php index;
 				for (size_t k = 0; k < c.location[i].index.size(); k++)
@@ -112,7 +115,7 @@ class Response
 					if (debug == true)
 						std::cout << "PATH1 : " << c.location[i].root + c.location[i].index[k] << " || " << r.path << " c " << c.location[i].path << " TF: " << (r.path.compare(c.location[i].path)) << std::endl;
 					if (!r.path.compare(c.location[i].path)
-						&& read_path(c.location[i].root + c.location[i].index[k], 200) != "")
+						&& read_path(c.location[i].root + c.location[i].index[k], 200, ai) != "")
 					{
 						if (debug == true)
 							std::cout << "METODO : |" << r.method << "|" << std::endl;
@@ -122,7 +125,7 @@ class Response
 						//ritorno risposta 405 + contenuto file
 						//ELSE: in tutti gli altri casi torno una default path
 						if (this->page_allow(c.location[i].method, r.method))
-							return read_path(c.location[i].root + c.location[i].index[k], 200);
+							return read_path(c.location[i].root + c.location[i].index[k], 200, ai);
 						else if (read_path(c.error_pages.getPath(405), 405) != "")
 							return	read_path(c.error_pages.getPath(405), 405);
 						else
@@ -142,7 +145,7 @@ class Response
 					if (debug == true)
 						std::cout << "PATH2 : " << subpath << std::endl;
 					//Vedo se effettivamente è possibile trovare il file alla path generata
-					if (read_path(subpath, 200) != "")
+					if (read_path(subpath, 200, ai) != "")
 					{
 						//IF: se la pagina ci è stata richiesta con un method da noi accettato e il file
 						//può essere aperto con successo allora ritorno risposta OK 200 + contenuto file
@@ -152,7 +155,7 @@ class Response
 						if (debug == true)
 							std::cout << "METODO : |" << r.method << "|" << std::endl;
 						if (this->page_allow(c.location[i].method, r.method))
-							return read_path(subpath, 200);
+							return read_path(subpath, 200, ai);
 						else if (read_path(c.error_pages.getPath(405), 405) != "")
 							return	read_path(c.error_pages.getPath(405), 405);
 						else
@@ -170,7 +173,7 @@ class Response
 			if (debug == true)
 				std::cout << "PATH3 : " << subpath << std::endl;
 			//se il file esiste alla subpath generata entra nell if
-			if (read_path(subpath, 200) != "")
+			if (read_path(subpath, 200, ai) != "")
 			{
 				//IF: se la pagina ci è stata richiesta con un method da noi accettato e il file
 				//può essere aperto con successo allora ritorno risposta OK 200 + contenuto file
@@ -178,7 +181,7 @@ class Response
 				//ritorno risposta 405 + contenuto file
 				//ELSE: in tutti gli altri casi torno una default path
 				if (this->page_allow(c.location[start].method, r.method))
-					return read_path(subpath, 200);
+					return read_path(subpath, 200, ai);
 				else if (read_path(c.error_pages.getPath(405), 405) != "")
 					return	read_path(c.error_pages.getPath(405), 405);
 				else
@@ -232,7 +235,6 @@ class Response
 		Response(Config_Server c, Request r) : conf(c)
 		{
 			this->request = r;
-			//generate_autoindex(c, r);
 			this->body = take_body(c, r);
 			this->connection =  "Connection: " + r.connection;
 			this->content_len = "Content-Length: " + std::to_string(this->body.length());
