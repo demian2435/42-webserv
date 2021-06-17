@@ -247,21 +247,21 @@ public:
 							{
 								std::cout << "ERRORE SEND" << std::endl;
 							}
-							if (client_map[i].req.transfer_encoding != "chunked")
-							{
-								std::cout << "Chiudiamo la connessione al socket " << i << std::endl;
-								// Chiudiamo la connessione
-								close(i);
-								// Eliminiamo l'FD dal set base
-								FD_CLR(i, &base_fd);
-								client_map.erase(i);
-								// Non abbiamo bisogno di aggiorare maxFd poichè non nuoce controllare qualche fd in più
-							}
+							if (client_map[i].req.transfer_encoding.size() > 0 &&  !(client_map[i].req.transfer_encoding.compare(0,7,"chunked")) && !(client_map[i].req.method.compare("PUT")) )
+								continue;
+
+							std::cout << "Chiudiamo la connessione al socket " << i << std::endl;
+							// Chiudiamo la connessione
+							close(i);
+							// Eliminiamo l'FD dal set base
+							FD_CLR(i, &base_fd);
+							client_map.erase(i);
+							// Non abbiamo bisogno di aggiorare maxFd poichè non nuoce controllare qualche fd in più
 						}
-						if (nbytes <= 0 && client_map[i].req.transfer_encoding != "chunked")
+						if (nbytes <= 0)
 						{
 							// Conessione chiusa dal client se 0 size
-							std::cout << "Connessione chiusa da socket " << i << std::endl;
+							std::cout << "Connessione chiusa dal socket " << i << std::endl;
 							// Chiudiamo la connessione
 							close(i);
 							// Eliminiamo l'FD dal set base
