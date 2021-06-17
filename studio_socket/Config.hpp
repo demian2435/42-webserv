@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+        */
+/*   By: forsili <forsili@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/14 12:33:40 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/17 11:19:00 by dmalori          ###   ########.fr       */
+/*   Updated: 2021/06/17 16:22:07 by forsili          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,6 +89,7 @@ class Location
 public:
 	std::string                     path;
     std::string                     root;
+    std::string                     redirect;
     std::vector<std::string>        index;
 	std::vector<std::string>		method;
     //std::list<std::string>          method;
@@ -98,6 +99,18 @@ public:
     size_t                          client_max_body_size;
 
 public:
+	Location()
+	{
+		this->path = "";
+		this->root = "";
+		this->index = std::vector<std::string>();
+		this->method = std::vector<std::string>();
+		this->cgi_extension = "";
+		this->cgi_path = "";
+		this->autoindex = false;
+		this->client_max_body_size = 0;
+	}
+
 	Location(std::ifstream &file, std::string path)
 	{
 		std::string					buff;
@@ -122,6 +135,8 @@ public:
 				this->root = parse[1];
 			if (!parse[0].compare("cgi_path") && parse.size() == 2)
 				this->cgi_path = parse[1];
+			if (!parse[0].compare("redirect") && parse.size() == 2)
+				this->redirect = parse[1];
 			if (!parse[0].compare("cgi_extension") && parse.size() == 2)
 				this->cgi_extension = parse[1];
 			if (!parse[0].compare("method"))

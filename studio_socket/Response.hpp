@@ -20,24 +20,30 @@ class Response
 {
 	private:
 		Config_Server		conf;
-		Request		request;
-		std::string	intestation;
-		std::string	status;
-		std::string	code;
-		std::string	content_len;
-		std::string	content_type;
-		std::string	connection;
-		std::string	body;
+		Request				request;
+		std::string			intestation;
+		std::string			status;
+		std::string			code;
+		std::string			content_len;
+		std::string			content_type;
+		std::string			connection;
+		std::string			body;
+		bool				redirection;
 
-		int extension(std::string path)
+		std::string extension(std::string path)
 		{
+			std::string tmp = "";
+		
 			if (path.length() < 5)
-				return 0;
-			if (!path.compare(path.length() - 4, 4, ".php"))
-				return (PHP);
-			if (!path.compare(path.length() - 4, 4, ".bla"))
-				return (BLA);
-			return (0);
+				return "";
+			for (size_t i = path.length() - 1; i > 0; i--)
+			{
+				tmp += path[i];
+				if (path[i] == '.')
+					break;
+			}
+			std::reverse(tmp.begin(), tmp.end());
+			return tmp;
 		}
 		
 		int	find_path(std::string path, Config_Server c)
@@ -50,7 +56,7 @@ class Response
 			return -1;
 		}
 
-		std::string	read_path(std::string path, int code, bool ai = false)
+		std::string	read_path(std::string path, int code, Location location)
 		{
 			//std::cout << path;
 			std::cout << YELLOW << path << " - " << code << RESET << std::endl;
@@ -69,16 +75,21 @@ class Response
 				this->intestation = "HTTP/1.1 401 UNAUTORIZED";
 			else if (code == 405)
 				this->intestation = "HTTP/1.1 405 METHOD NOT ALLOWED";
+			else if (code == 301)
+			{
+				this->intestation = "HTTP/1.1 301 MOVED PERMANENTLY\n";
+				this->intestation += "Location: " + location.redirect + "\n";
+				this->redirection = true;
+				return "";
+			}
 			
 			if (myfile.good())
 			{
-				/*
-				if (extension(path) == PHP)
-					// start php cgi;
-				else if (extension(path) == BLA)
-					// start tester cgi
-				*/
-				if (code == 200 && ai == true && (tmp = generate_autoindex(path)) != "")
+				//std::cout << BOLDMAGENTA << location.cgi_extension.compare(extension(path)) << RESET << std::endl;
+				//std::cout << BOLDMAGENTA  << extension(path) << std::endl  << location.cgi_extension << std::endl << RESET << std::endl;
+				if (location.cgi_path != "" && location.cgi_extension != "" && !location.cgi_extension.compare(extension(path)))
+					std::cout << BOLDMAGENTA << extension(path) << RESET << std::endl;
+				if (code == 200 && location.autoindex == true && (tmp = generate_autoindex(path)) != "")
 					return (tmp);
 				while (getline(myfile, buff))
 					out += buff + "\n";
@@ -105,11 +116,9 @@ class Response
 		{
 			//Set true this to debug
 			bool	debug = true;
-			// ai = autoindex
-			bool	ai;
 
-			if (!(r.is_valid()) && read_path(c.error_pages.getPath(400), 400) != "")
-				return read_path(c.error_pages.getPath(400), 400);
+			if (!(r.is_valid()) && read_path(c.error_pages.getPath(400), 400, Location()) != "")
+				return read_path(c.error_pages.getPath(400), 400, Location());
 			else if (!(r.is_valid()))
 				return DEFAULT_400;
 			//Start cerca l indice della path / nel vector location
@@ -120,7 +129,6 @@ class Response
 			//alla ricerca della location che corrisponde alla path della richiesta
 			for (size_t i = 0; i < c.location.size(); i++)
 			{
-				ai = c.location[i].autoindex;
 				//Ciclo all' interno della lista di index parsata dal config file 
 				//line condfig ex. index index.html index.php index;
 				for (size_t k = 0; k < c.location[i].index.size(); k++)
@@ -134,7 +142,8 @@ class Response
 					if (debug == true)
 						std::cout << "PATH1 : " << c.location[i].root + c.location[i].index[k] << " || " << r.path << " c " << c.location[i].path << " TF: " << (r.path.compare(c.location[i].path)) << std::endl;
 					if (!r.path.compare(c.location[i].path)
-						&& read_path(c.location[i].root + c.location[i].index[k], 200, ai) != "")
+						&& (read_path(c.location[i].root + c.location[i].index[k], 200, c.location[i]) != "" 
+						|| c.location[i].redirect != ""))
 					{
 						if (debug == true)
 							std::cout << "METODO : |" << r.method << "|" << std::endl;
@@ -143,10 +152,12 @@ class Response
 						//ELSE IF: controllo se esiste una path per l errore 405 forbidden, se esiste 
 						//ritorno risposta 405 + contenuto file
 						//ELSE: in tutti gli altri casi torno una default path
-						if (this->page_allow(c.location[i].method, r.method))
-							return read_path(c.location[i].root + c.location[i].index[k], 200, ai);
-						else if (read_path(c.error_pages.getPath(405), 405) != "")
-							return	read_path(c.error_pages.getPath(405), 405);
+						if (this->page_allow(c.location[i].method, r.method) && c.location[i].redirect == "")
+							return read_path(c.location[i].root + c.location[i].index[k], 200, c.location[i]);
+						else if (c.location[i].redirect != "")
+							return	read_path("", 301 , c.location[i]);
+						else if (read_path(c.error_pages.getPath(405), 405, c.location[i]) != "")
+							return	read_path(c.error_pages.getPath(405), 405, c.location[i]);
 						else
 							return DEFAULT_405;
 					}
@@ -164,7 +175,7 @@ class Response
 					if (debug == true)
 						std::cout << "PATH2 : " << subpath << std::endl;
 					//Vedo se effettivamente è possibile trovare il file alla path generata
-					if (read_path(subpath, 200, ai) != "")
+					if (read_path(subpath, 200, c.location[i]) != "" || c.location[i].redirect != "")
 					{
 						//IF: se la pagina ci è stata richiesta con un method da noi accettato e il file
 						//può essere aperto con successo allora ritorno risposta OK 200 + contenuto file
@@ -173,10 +184,12 @@ class Response
 						//ELSE: in tutti gli altri casi torno una default path
 						if (debug == true)
 							std::cout << "METODO : |" << r.method << "|" << std::endl;
-						if (this->page_allow(c.location[i].method, r.method))
-							return read_path(subpath, 200, ai);
-						else if (read_path(c.error_pages.getPath(405), 405) != "")
-							return	read_path(c.error_pages.getPath(405), 405);
+						if (this->page_allow(c.location[i].method, r.method) && c.location[i].redirect == "")
+							return read_path(subpath, 200, c.location[i]);
+						else if (c.location[i].redirect != "")
+							return	read_path("", 301 , c.location[i]);
+						else if (read_path(c.error_pages.getPath(405), 405, c.location[i]) != "")
+							return	read_path(c.error_pages.getPath(405), 405, c.location[i]);
 						else
 							return DEFAULT_405;
 					}
@@ -192,25 +205,27 @@ class Response
 			if (debug == true)
 				std::cout << "PATH3 : " << subpath << std::endl;
 			//se il file esiste alla subpath generata entra nell if
-			if (read_path(subpath, 200, ai) != "")
+			if (read_path(subpath, 200, c.location[start]) != "" || c.location[start].redirect != "")
 			{
 				//IF: se la pagina ci è stata richiesta con un method da noi accettato e il file
 				//può essere aperto con successo allora ritorno risposta OK 200 + contenuto file
 				//ELSE IF: controllo se esiste una path per l errore 405 forbidden, se esiste 
 				//ritorno risposta 405 + contenuto file
 				//ELSE: in tutti gli altri casi torno una default path
-				if (this->page_allow(c.location[start].method, r.method))
-					return read_path(subpath, 200, ai);
-				else if (read_path(c.error_pages.getPath(405), 405) != "")
-					return	read_path(c.error_pages.getPath(405), 405);
+				if (this->page_allow(c.location[start].method, r.method) && c.location[start].redirect == "")
+					return read_path(subpath, 200, c.location[start]);
+				else if (c.location[start].redirect != "")
+							return	read_path("", 301 , c.location[start]);
+				else if (read_path(c.error_pages.getPath(405), 405, c.location[start]) != "")
+					return	read_path(c.error_pages.getPath(405), 405, c.location[start]);
 				else
 					return DEFAULT_405;
 			}
 			//IF: controllo se esiste una path per l errore 405 forbidden, se esiste 
 			//ritorno risposta 404 + contenuto file
 			//ELSE: ritorno una pagina di errore 404 di default
-			if (read_path(c.error_pages.getPath(404), 404) != "")
-				return	read_path(c.error_pages.getPath(404), 404);
+			if (read_path(c.error_pages.getPath(404), 404, Location()) != "")
+				return	read_path(c.error_pages.getPath(404), 404, Location());
 			return DEFAULT_404;
 		}
 
@@ -253,13 +268,21 @@ class Response
 		Response(){}
 		Response(Config_Server c, Request r) : conf(c)
 		{
+			this->redirection = false;
 			this->request = r;
 			this->body = take_body(c, r);
-			this->connection =  "Connection: " + r.connection;
-			this->content_len = "Content-Length: " + std::to_string(this->body.length());
-			this->content_type = "Content-Type: text/html";
-			this->out = "";
-			this->out = this->intestation + "\n" + this->content_type + "\n" + this->content_len + "\n" +this->connection + "\n\n" + this->body;
+			if (!this->redirection)
+			{
+				this->connection =  "Connection: " + r.connection;
+				this->content_len = "Content-Length: " + std::to_string(this->body.length());
+				this->content_type = "Content-Type: text/html";
+				this->out = "";
+				this->out = this->intestation + "\n" + this->content_type + "\n" + this->content_len + "\n" +this->connection + "\n\n" + this->body;
+			}
+			else
+			{
+				this->out = this->intestation + "\n";
+			}
 		}
 		//~Response();
 };

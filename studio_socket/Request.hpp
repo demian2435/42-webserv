@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aduregon <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: forsili <forsili@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/17 13:05:45 by aduregon         ###   ########.fr       */
+/*   Updated: 2021/06/17 15:03:05 by forsili          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -440,7 +440,7 @@ public:
 			if (this->content_length > 0)
 			{
 				std::cout << this->body.length() << " " << this->content_length << " \n";
-				if (this->body.length() != this->content_length)
+				if (this->body.length() != (size_t)this->content_length)
 					return false;
 			}
 			else if (!(this->transfer_encoding.compare("chunked")))
