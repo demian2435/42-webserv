@@ -231,7 +231,7 @@ class Response
 
 	public:
 		std::string	out;
-
+		Response(){}
 		Response(Config_Server c, Request r) : conf(c)
 		{
 			this->request = r;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aduregon <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/14 12:33:40 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/15 11:31:10 by aduregon         ###   ########.fr       */
+/*   Updated: 2021/06/17 11:19:00 by dmalori          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,6 +167,7 @@ public:
     ErrorPages              	error_pages;
 	std::vector<Location>		location;
 public:
+	Config_Server(){}
 	Config_Server(std::ifstream &file)
 	{
 		std::string					buff;

@@ -229,7 +229,8 @@ public:
 						}
 						if (client_map[i].header_ok())
 						{
-							Request req(client_map[i].buffer);
+							//Request req(client_map[i].buffer);
+							client_map[i].getRequest();
 							//if (req.content_length > ( client_map[i].buffer.size() - client_map[i].buffer.find("\r\n\r\n") )  )
 							//	continue;
 							//if (req.transfer_encoding == "chunked")
@@ -240,22 +241,24 @@ public:
 							//	FileUpload file(req.body);
 							// Mandiamo la risposta al client,
 							// per capire a quale server è stata inviata la richiesta andiamo a vedere nella mappa a quale configurazione equivale la porta della richiesta
-							Response resp(conf.server[client_map[i].index_server], req);
-							std::cout << GREEN << resp.out << RESET << std::endl;
-							if (send(i, resp.out.c_str(), resp.out.length(), 0) == -1)
+							client_map[i].getResponse(conf);
+							std::cout << GREEN << client_map[i].res.out << RESET << std::endl;
+							if (send(i, client_map[i].res.out.c_str(), client_map[i].res.out.length(), 0) == -1)
 							{
 								std::cout << "ERRORE SEND" << std::endl;
 							}
-							// Conessione chiusa dal client se 0 size
-							std::cout << "Connessione chiusa da socket " << i << std::endl;
-							// Chiudiamo la connessione
-							close(i);
-							// Eliminiamo l'FD dal set base
-							FD_CLR(i, &base_fd);
-							client_map.erase(i);
-							// Non abbiamo bisogno di aggiorare maxFd poichè non nuoce controllare qualche fd in più
+							if (client_map[i].req.transfer_encoding != "chunked")
+							{
+								std::cout << "Chiudiamo la connessione al socket " << i << std::endl;
+								// Chiudiamo la connessione
+								close(i);
+								// Eliminiamo l'FD dal set base
+								FD_CLR(i, &base_fd);
+								client_map.erase(i);
+								// Non abbiamo bisogno di aggiorare maxFd poichè non nuoce controllare qualche fd in più
+							}
 						}
-						if (nbytes <= 0)
+						if (nbytes <= 0 && client_map[i].req.transfer_encoding != "chunked")
 						{
 							// Conessione chiusa dal client se 0 size
 							std::cout << "Connessione chiusa da socket " << i << std::endl;
