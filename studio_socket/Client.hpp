@@ -33,7 +33,10 @@ class Client
     bool header_ok(void)
     {
         if (time == 0)
+        {
+            std::chrono::time_point<std::chrono::system_clock> p1 = std::chrono::system_clock::now();
             time = std::chrono::duration_cast<std::chrono::milliseconds>(p1.time_since_epoch()).count();
+        }
         if (header == false)
         {
             if (buffer.find("\r\n\r\n") != std::string::npos)
