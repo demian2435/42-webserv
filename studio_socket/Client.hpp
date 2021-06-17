@@ -33,6 +33,12 @@ class Client
         return false;
     }
 
+    bool isReady(void)
+    {
+        getRequest();
+        return req.is_ready();
+    }
+
     void getRequest(void)
     {
         req = Request(buffer);

@@ -15,7 +15,7 @@
 #include "Response.hpp"
 #include "FileUpload.hpp"
 #include "Client.hpp"
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 5000000
 
 class Server
 {
@@ -227,16 +227,14 @@ public:
 						{
 							client_map[i].appendBuffer(buff, nbytes);
 						}
-						if (client_map[i].header_ok())
+						if (client_map[i].header_ok() &&  client_map[i].isReady())
 						{
-							//Request req(client_map[i].buffer);
-							client_map[i].getRequest();
 							//if (req.content_length > ( client_map[i].buffer.size() - client_map[i].buffer.find("\r\n\r\n") )  )
 							//	continue;
 							//if (req.transfer_encoding == "chunked")
 							//	continue;
 							std::cout << "Messaggio del client: " << i << std::endl;
-							std::cout << client_map[i].buffer << std::endl;
+							//std::cout << client_map[i].buffer << std::endl;
 							//if (req.content_type.compare(""))
 							//	FileUpload file(req.body);
 							// Mandiamo la risposta al client,
@@ -247,9 +245,6 @@ public:
 							{
 								std::cout << "ERRORE SEND" << std::endl;
 							}
-							if (client_map[i].req.transfer_encoding.size() > 0 &&  !(client_map[i].req.transfer_encoding.compare(0,7,"chunked")) && !(client_map[i].req.method.compare("PUT")) )
-								continue;
-
 							std::cout << "Chiudiamo la connessione al socket " << i << std::endl;
 							// Chiudiamo la connessione
 							close(i);

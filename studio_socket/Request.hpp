@@ -6,7 +6,7 @@
 /*   By: forsili <forsili@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/17 15:03:05 by forsili          ###   ########.fr       */
+/*   Updated: 2021/06/17 16:37:57 by forsili          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,7 +110,7 @@ public:
 					this->method_path += str[i];
 					i++;
 				}
-				std::cout << "PATH: " << this->method_path << std::endl;
+				//std::cout << "PATH: " << this->method_path << std::endl;
 				while (str[i] && str[i] == 32)
 					i++;
 				while (str[i] && str[i] != '\n')
