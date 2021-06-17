@@ -14,6 +14,7 @@
 #include "Request.hpp"
 #include "Response.hpp"
 #include "FileUpload.hpp"
+#include "Client.hpp"
 #define BUFFER_SIZE 1024
 
 class Server
@@ -59,16 +60,15 @@ private:
 	struct timeval s_timeout;
 	// timeout in secondi per il server
 	int timeout;
-	// variabile del while per il main loop
-	bool play_loop;
 	// stringa temporanea per buffer molto grandi
 	std::string buff_temp;
+	// mappa dei client attivi
+	std::map<int, Client> client_map;
 
 	//----------------------PREPARAZIONE----------------------------//
 public:
 	Server(std::string _path = "./webserv.conf")
 	{
-		play_loop = true;
 		fdMax = -1;
 		for (int i = 0; i < BUFFER_SIZE; i++)
 			buff[i] = 0;
@@ -165,7 +165,7 @@ public:
 	// del codice poichè vanno gestiti tutti i flussi in contemporanea
 	int start()
 	{
-		while (play_loop)
+		while (true)
 		{
 			std::cout << GREEN << "SERVER IN ATTESA" << RESET << std::endl;
 			// Impostiamo il timeout del server, poiche ogni volta si azzera
@@ -209,8 +209,10 @@ public:
 							// Se il nuovo FD supera il maxFd attuale lo aggiorniamo
 							if (newfd > fdMax)
 								fdMax = newfd;
-							
-							std::cout << "Nuova connessione da " << inet_ntoa(clientAddr.sin_addr) << " sul socket " << newfd << std::endl;
+							Client c(i, newfd, addrlen, clientAddr);
+							client_map[newfd] = c;
+
+							std::cout << "Nuova connessione da " << c.getIp() << " sul socket " << c.fd_client << std::endl;
 						}
 					}
 					else // Se è Client significa che vuole dirci qualcosa, poichè il set minitora se ci sono
@@ -219,28 +221,24 @@ public:
 						// Leggiamo il buffer inviatoci dal client (In caso 0 o -1 chiudiamo la connessione)
 						nbytes = recv(i, buff, sizeof(buff), 0);
 
-						if (nbytes == BUFFER_SIZE)
+						if (nbytes > 0) // Se l lettura è andata a buon fine parsiamo la richiesta e rispondiamo al client
 						{
-							over_buffer[i].append(buff, 0 , BUFFER_SIZE);
-							//continue;
+							client_map[i].appendBuffer(buff, nbytes);
 						}
-						else if (nbytes > 0) // Se l lettura è andata a buon fine parsiamo la richiesta e rispondiamo al client
+						if (client_map[i].header_ok())
 						{
-							over_buffer[i].append(buff, 0 , nbytes);
-						}
-						if (over_buffer[i].find("\r\n\r\n") != std::string::npos)
-						{
-							Request req(over_buffer[i]);
-							if (req.content_length > ( over_buffer[i].size() - over_buffer[i].find("\r\n\r\n") )  )
-								continue;
+							Request req(client_map[i].buffer);
+							//if (req.content_length > ( client_map[i].buffer.size() - client_map[i].buffer.find("\r\n\r\n") )  )
+							//	continue;
+							//if (req.transfer_encoding == "chunked")
+							//	continue;
 							std::cout << "Messaggio del client: " << i << std::endl;
-							std::cout << over_buffer[i] << std::endl;
-							over_buffer.erase(i);
-							if (req.content_type.compare(""))
-								FileUpload file(req.body);
+							std::cout << client_map[i].buffer << std::endl;
+							//if (req.content_type.compare(""))
+							//	FileUpload file(req.body);
 							// Mandiamo la risposta al client,
 							// per capire a quale server è stata inviata la richiesta andiamo a vedere nella mappa a quale configurazione equivale la porta della richiesta
-							Response resp(conf.server[port_server.find(req.host_port)->second], req);
+							Response resp(conf.server[client_map[i].fd_server], req);
 							std::cout << GREEN << resp.out << RESET << std::endl;
 							if (send(i, resp.out.c_str(), resp.out.length(), 0) == -1)
 							{
@@ -252,6 +250,7 @@ public:
 							close(i);
 							// Eliminiamo l'FD dal set base
 							FD_CLR(i, &base_fd);
+							client_map.erase(i);
 							// Non abbiamo bisogno di aggiorare maxFd poichè non nuoce controllare qualche fd in più
 						}
 						if (nbytes <= 0)
@@ -262,6 +261,7 @@ public:
 							close(i);
 							// Eliminiamo l'FD dal set base
 							FD_CLR(i, &base_fd);
+							client_map.erase(i);
 							// Non abbiamo bisogno di aggiorare maxFd poichè non nuoce controllare qualche fd in più
 						}
 					}
