@@ -6,7 +6,7 @@
 /*   By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/17 16:40:38 by dmalori          ###   ########.fr       */
+/*   Updated: 2021/06/17 16:55:31 by dmalori          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -460,7 +460,7 @@ public:
 		if (!(this->transfer_encoding.compare(0, 7, "chunked")) && this->transfer_encoding.size() >= 8)
 			this->transfer_encoding.erase(7, this->transfer_encoding.size() - 7);
 		
-		if (!(this->method.compare("PUT")) || !(this->method.compare("POST")))
+		if (!(this->method.compare("PUT")))
 		{
 			if ((this->content_length != 0 && this->content_type.compare("")) ||
 				!(this->transfer_encoding.compare(0, 7, "chunked")))

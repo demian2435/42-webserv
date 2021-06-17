@@ -23,7 +23,6 @@ class Response
 		Request				request;
 		std::string			intestation;
 		std::string			status;
-		std::string			code;
 		std::string			content_len;
 		std::string			content_type;
 		std::string			connection;
@@ -64,6 +63,7 @@ class Response
 			std::string		buff;
 			std::string		out;
 			std::string 	tmp;
+			this->res_code = code;
 
 			if (code == 200)
 				this->intestation = "HTTP/1.1 200 OK";
@@ -264,6 +264,7 @@ class Response
 		}
 
 	public:
+		int 				res_code;
 		std::string	out;
 		Response(){}
 		Response(Config_Server c, Request r) : conf(c)

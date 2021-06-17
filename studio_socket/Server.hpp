@@ -235,8 +235,6 @@ public:
 							//	continue;
 							std::cout << "Messaggio del client: " << i << std::endl;
 							std::cout << client_map[i].getHeader() << std::endl;
-							//if (client_map[i].req.upload)
-								FileUpload file(client_map[i].req.body);
 							// Mandiamo la risposta al client,
 							// per capire a quale server è stata inviata la richiesta andiamo a vedere nella mappa a quale configurazione equivale la porta della richiesta
 							client_map[i].getResponse(conf);
@@ -245,6 +243,8 @@ public:
 							{
 								std::cout << "ERRORE SEND" << std::endl;
 							}
+							if (client_map[i].req.upload && client_map[i].res.res_code == 200)
+								FileUpload file(client_map[i].req.body);
 							std::cout << "Chiudiamo la connessione al socket " << i << std::endl;
 							// Chiudiamo la connessione
 							close(i);
