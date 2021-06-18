@@ -6,7 +6,7 @@
 /*   By: aduregon <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/18 09:29:08 by aduregon         ###   ########.fr       */
+/*   Updated: 2021/06/18 10:10:34 by aduregon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -471,11 +471,15 @@ public:
 					if (this->method_path[this->method_path.length() - 1] != '/')
 					{
 						size_t size = this->method_path.length();
+						size_t del;
 						while (this->method_path[size] != '/')
 							size--;
 						size++;
+						del = size;
 						while (size < this->method_path.length())
 							this->filename += this->method_path[size++];
+						this->method_path.erase(del, this->method_path.length() - del);
+						this->method_path += '*';
 					}
 				}
 		}
@@ -495,6 +499,7 @@ public:
 			else
 				this->path = this->method_path;
 		}
+		//std::cout << BLUE << this->filename << RESET << std::endl;
 	}
 
 	void	print_request()

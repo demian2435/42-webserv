@@ -6,7 +6,7 @@
 /*   By: aduregon <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/15 15:03:15 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/18 09:29:22 by aduregon         ###   ########.fr       */
+/*   Updated: 2021/06/18 10:12:21 by aduregon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,8 +31,9 @@ public:
 		if (!(req.transfer_encoding.compare(0, 7, "chunked")))
 		{
 			long int time = std::chrono::duration_cast<std::chrono::milliseconds>(p1.time_since_epoch()).count();
+
 			if (req.filename.compare(""))
-				name = req.filename + "_" + std::to_string(time);
+				name = req.filename; //+ "_" + std::to_string(time);
 			else
 				name = "file_" + std::to_string(time);
 			std::ofstream file("./upload/" + name);
@@ -61,7 +62,11 @@ public:
 		else
 		{
 			long int time = std::chrono::duration_cast<std::chrono::milliseconds>(p1.time_since_epoch()).count();
-			name = "file_" + std::to_string(time);
+
+			if (req.filename.compare(""))
+				name = req.filename; //+ "_" + std::to_string(time);
+			else
+				name = "file_" + std::to_string(time);
 			std::ifstream file("./upload/" + name);
 			if (!file.is_open())
 			{
