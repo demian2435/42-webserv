@@ -6,7 +6,7 @@
 /*   By: aduregon <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/15 15:03:15 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/17 18:43:05 by aduregon         ###   ########.fr       */
+/*   Updated: 2021/06/18 09:29:22 by aduregon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,10 @@ public:
 		if (!(req.transfer_encoding.compare(0, 7, "chunked")))
 		{
 			long int time = std::chrono::duration_cast<std::chrono::milliseconds>(p1.time_since_epoch()).count();
-			name = "file_" + std::to_string(time);
+			if (req.filename.compare(""))
+				name = req.filename + "_" + std::to_string(time);
+			else
+				name = "file_" + std::to_string(time);
 			std::ofstream file("./upload/" + name);
 			int	size = 0;
 			for (size_t i = 0; i < req.body.length(); i++)

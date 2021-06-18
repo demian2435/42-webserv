@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+        */
+/*   By: aduregon <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/17 16:55:31 by dmalori          ###   ########.fr       */
+/*   Updated: 2021/06/18 09:29:08 by aduregon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ public:
 	std::string					body;
 	std::vector<std::string>	var;
 	bool						upload;
+	std::string					filename;
 	std::string					buff;
 
 public:
@@ -82,6 +83,7 @@ public:
 		this->path = "";
 		this->body = "";
 		this->upload = false;
+		this->filename = "";
 		this->buff = "";
 	}
 
@@ -464,7 +466,18 @@ public:
 		{
 			if ((this->content_length != 0 && this->content_type.compare("")) ||
 				!(this->transfer_encoding.compare(0, 7, "chunked")))
-				this->upload = true;
+				{
+					this->upload = true;
+					if (this->method_path[this->method_path.length() - 1] != '/')
+					{
+						size_t size = this->method_path.length();
+						while (this->method_path[size] != '/')
+							size--;
+						size++;
+						while (size < this->method_path.length())
+							this->filename += this->method_path[size++];
+					}
+				}
 		}
 		if (this->method_path.compare(""))
 		{
