@@ -70,7 +70,7 @@ public:
 			buff[i] = 0;
 		conf = Config(_path);
 		yes = 1;
-		max_connections = 10;
+		max_connections = 100000;
 		timeout = 30;
 		
 		// Azzeriamo i set

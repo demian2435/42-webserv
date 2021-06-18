@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aduregon <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/14 12:33:40 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/18 15:00:45 by aduregon         ###   ########.fr       */
+/*   Updated: 2021/06/18 15:19:53 by dmalori          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,7 +117,7 @@ public:
 		std::string					line;
 		std::vector<std::string>	parse;
 		int							i;
-		
+		this->autoindex = false;
 		this->client_max_body_size = -1;
 		this->path = path;
 		while (getline(file, buff))
