@@ -27,6 +27,7 @@ class Response
 		std::string			content_type;
 		std::string			connection;
 		std::string			body;
+		bool				oversize;
 		bool				redirection;
 
 		std::string extension(std::string path)
@@ -93,6 +94,11 @@ class Response
 					return (tmp);
 				while (getline(myfile, buff))
 					out += buff + "\n";
+				if (location.client_max_body_size != -1 && (size_t)location.client_max_body_size < out.length())
+				{
+					this->intestation = "HTTP/1.1 413 PAYLOAD TOO LARGE";
+					this->oversize = true;
+				}
 				return out;
 			}
 			return "";
@@ -270,6 +276,7 @@ class Response
 		Response(Config_Server c, Request r) : conf(c)
 		{
 			this->redirection = false;
+			this->oversize = false;
 			this->request = r;
 			this->body = take_body(c, r);
 			if (!this->redirection)
@@ -278,7 +285,10 @@ class Response
 				this->content_len = "Content-Length: " + std::to_string(this->body.length());
 				this->content_type = "Content-Type: text/html";
 				this->out = "";
-				this->out = this->intestation + "\n" + this->content_type + "\n" + this->content_len + "\n" +this->connection + "\n\n" + this->body;
+				if (this->oversize || r.method == "HEAD")
+					this->out = this->intestation + "\n" +this->connection + "\n\n";
+				else
+					this->out = this->intestation + "\n" + this->content_type + "\n" + this->content_len + "\n" +this->connection + "\n\n" + this->body;
 			}
 			else
 			{
