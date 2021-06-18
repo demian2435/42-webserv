@@ -226,7 +226,10 @@ public:
 						if (client_map[i].header_ok() && client_map[i].isReady())
 						{
 							std::cout << "Messaggio del client: " << i << std::endl;
+							if (!(client_map[i].req.transfer_encoding.compare(0, 7, "chunked")))
+								parse_chunked(client_map[i]);
 							std::cout << client_map[i].getHeader() << std::endl;
+							// std::cout << client_map[i].req.body <<std::endl;
 							// Mandiamo la risposta al client,
 							// per capire a quale server è stata inviata la richiesta andiamo a vedere nella mappa a quale configurazione equivale la porta della richiesta
 							client_map[i].getResponse(conf);
@@ -271,6 +274,43 @@ public:
 	int stop()
 	{
 		return (0);
+	}
+
+	void		parse_chunked(Client &c)
+	{
+		int	size = 0;
+		std::string	tmp_body;
+
+		for (size_t i = 0; i < c.req.body.length(); i++)
+		{
+			std::string tmp;
+			// 13 == \r
+			while (c.req.body[i] != 13)
+			{
+				tmp += c.req.body[i];
+				i++;
+			}
+			size = htoi(tmp);
+			if (!size)
+				break ;
+			i += 2 ;
+			for (size_t j = 0; j < (size_t)size; j++)
+			{
+				tmp_body += c.req.body[i];
+				i++;
+			}
+		}
+		c.req.body = tmp_body;
+	}
+
+	int		htoi(std::string hex)
+	{
+		std::stringstream x;
+		int res;
+		
+		x << std::hex << hex;
+		x >> res;
+		return res;
 	}
 };
 
