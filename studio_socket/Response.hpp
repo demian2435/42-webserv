@@ -5,6 +5,8 @@
 #include "CgiManager.hpp"
 #include <dirent.h>
 #include <sstream>
+#include <ctime>
+#include <unistd.h>
 
 #define DEFAULT_404 "<html><h1>ERROR 404 NOT FOUND</h1></html>\n"
 #define DEFAULT_401 "<html><h1>ERROR 401 UNAUTORIZED</h1></html>\n"
@@ -281,6 +283,18 @@ class Response
 			return (abody);
 		}
 
+		std::string generate_cookie()
+		{
+			std::string ret;
+			const char alphanum[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+			
+			srand((unsigned)time(NULL) * getpid());
+
+			for (int i = 0; i < 50; ++i) 
+				ret.push_back(alphanum[rand() % (sizeof(alphanum) - 1)]);
+			return ret;
+		}
+
 	public:
 		int 				res_code;
 		std::string	out;
@@ -300,7 +314,13 @@ class Response
 				if (this->oversize || r.method == "HEAD")
 					this->out = this->intestation + "\n" +this->connection + "\n\n";
 				else
-					this->out = this->intestation + "\n" + this->content_type + "\n" + this->content_len + "\n" +this->connection + "\n\n" + this->body;
+				{
+					this->out = this->intestation + "\n" + this->content_type + "\n" + this->content_len + "\n" +this->connection;
+					// generates cookie if needed
+					if (r.cookie.find("_id=") == std::string::npos)
+						this->out += "Set-Cookie: _id=" + generate_cookie() + "\n";
+					this->out += "\n\n" + this->body;
+				}
 			}
 			else
 			{
