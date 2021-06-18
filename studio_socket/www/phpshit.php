@@ -12,7 +12,7 @@
 //echo $_POST['ciccio'];
 //echo "\n";
 var_dump($_GET);
-//var_dump($_POST);
+var_dump($_POST);
 //var_dump($_ENV);
 //print_r ($_GET);
 ?>

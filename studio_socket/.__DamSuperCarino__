@@ -1,0 +1,24 @@
+Status: 200 OK
+Content-Type: text/html; charset=utf-8
+
+<!DOCTYPE HTML>
+<HTML>
+<BODY>
+
+<H1>MY FIRST PHP PAGE</H1>
+
+<?PHP
+//PRINT_R($_ENV);
+//ECHO $_GET['CIAO'];
+//ECHO "<BR>";
+//ECHO $_POST['CIAO'];
+//ECHO $_POST['CICCIO'];
+//ECHO "\N";
+VAR_DUMP($_GET);
+VAR_DUMP($_POST);
+//VAR_DUMP($_ENV);
+//PRINT_R ($_GET);
+?>
+
+</BODY>
+</HTML>
