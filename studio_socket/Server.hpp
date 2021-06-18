@@ -80,7 +80,7 @@ public:
 		for (size_t i = 0; i < conf.server.size(); i++)
 		{
 			select_port = conf.server[i].port;
-			select_ip = "0.0.0.0";
+			select_ip = conf.server[i].host;
 			if (setup(i))
 				exit(0);
 		}

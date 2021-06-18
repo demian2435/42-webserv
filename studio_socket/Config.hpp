@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: forsili <forsili@student.42.fr>            +#+  +:+       +#+        */
+/*   By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/14 12:33:40 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/17 16:22:07 by forsili          ###   ########.fr       */
+/*   Updated: 2021/06/18 09:59:48 by dmalori          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -202,10 +202,10 @@ public:
 				i++;
 			}
 			parse = split(line, " ");
-			if (!parse[0].compare("listen") && parse.size() == 2)
+			if (!parse[0].compare("listen") && parse.size() == 3)
 			{
-				//this->host = parse[1];
-				this->port = std::stoi(parse[1].c_str());
+				this->host = parse[1];
+				this->port = std::stoi(parse[2].c_str());
 			}
 			if (!parse[0].compare("error_page") && parse.size() == 3)
 				error_pages.insertPath(std::stoi(parse[1].c_str()), parse[2]);
