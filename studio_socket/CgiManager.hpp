@@ -125,6 +125,7 @@ public:
         int in = open(path.c_str(), O_RDONLY);
         pid = fork();
         std::stringstream buffer;
+        std::string result;
         if (!pid)
         {
             std::stringstream sstr, len;
@@ -151,12 +152,15 @@ public:
             close(fd);
             std::ifstream t(".__DamSuperCarino__", std::ifstream::in);
             buffer << t.rdbuf();
+            result = buffer.str();
+            size_t pos = result.find("\r\n\r\n", 4);
+            result = result.substr(pos + 4);
             t.close();
         }
         for (size_t i = 0; cmd[i]; i++)
             free(cmd[i]);
         free(cmd);
-        return buffer.str();
+        return result;
     }
     static char **vecToCmd(std::vector<std::string> const & vec, std::string const & cgi_path, std::string const & path)
     {
