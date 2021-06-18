@@ -94,7 +94,7 @@ class Response
 					return (tmp);
 				while (getline(myfile, buff))
 					out += buff + "\n";
-				if (location.client_max_body_size < out.length())
+				if (location.client_max_body_size != -1 && (size_t)location.client_max_body_size < out.length())
 				{
 					this->intestation = "HTTP/1.1 413 PAYLOAD TOO LARGE";
 					this->oversize = true;

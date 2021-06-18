@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+        */
+/*   By: aduregon <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/14 12:33:40 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/18 09:59:48 by dmalori          ###   ########.fr       */
+/*   Updated: 2021/06/18 15:00:45 by aduregon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,7 @@ public:
     std::string                     cgi_path;
     std::string                     cgi_extension;
     bool                            autoindex;
-    size_t                          client_max_body_size;
+    int								client_max_body_size;
 
 public:
 	Location()
@@ -108,7 +108,7 @@ public:
 		this->cgi_extension = "";
 		this->cgi_path = "";
 		this->autoindex = false;
-		this->client_max_body_size = 0;
+		this->client_max_body_size = -1;
 	}
 
 	Location(std::ifstream &file, std::string path)
@@ -118,6 +118,7 @@ public:
 		std::vector<std::string>	parse;
 		int							i;
 		
+		this->client_max_body_size = -1;
 		this->path = path;
 		while (getline(file, buff))
 		{
@@ -165,6 +166,7 @@ public:
 			line.clear();
 		}
 	}
+
 	~Location() {}
 };
 
