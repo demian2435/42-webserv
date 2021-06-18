@@ -2,6 +2,7 @@
 
 #include "Config.hpp"
 #include "Request.hpp"
+#include "CgiManager.hpp"
 #include <dirent.h>
 #include <sstream>
 
@@ -88,12 +89,17 @@ class Response
 			{
 				//std::cout << BOLDMAGENTA << location.cgi_extension.compare(extension(path)) << RESET << std::endl;
 				//std::cout << BOLDMAGENTA  << extension(path) << std::endl  << location.cgi_extension << std::endl << RESET << std::endl;
-				if (location.cgi_path != "" && location.cgi_extension != "" && !location.cgi_extension.compare(extension(path)))
-					std::cout << BOLDMAGENTA << extension(path) << RESET << std::endl;
 				if (code == 200 && location.autoindex == true && (tmp = generate_autoindex(path)) != "")
 					return (tmp);
-				while (getline(myfile, buff))
-					out += buff + "\n";
+				if (location.cgi_path != "" && location.cgi_extension != "" && !location.cgi_extension.compare(extension(path)))
+				{
+					out = CgiManager::solve_all(path, this->request, location.cgi_path, location.cgi_extension);
+				}
+				else
+				{
+					while (getline(myfile, buff))
+						out += buff + "\n";
+				}
 				if (location.client_max_body_size != -1 && (size_t)location.client_max_body_size < out.length())
 				{
 					this->intestation = "HTTP/1.1 413 PAYLOAD TOO LARGE";
