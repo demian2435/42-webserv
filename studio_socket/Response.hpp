@@ -93,7 +93,13 @@ class Response
 					return (tmp);
 				if (location.cgi_path != "" && location.cgi_extension != "" && !location.cgi_extension.compare(extension(path)))
 				{
-					out = CgiManager::solve_all(path, this->request, location.cgi_path, location.cgi_extension);
+					if(!this->request.content_type.compare(0, 9, "test/file"))
+					{
+						std::cout << "PARSARE IL BODY E REINSERIRLO NELLA RISPOSTA" << std::endl;
+						out = "NULL";
+					}
+					else
+						out = CgiManager::solve_all(path, this->request, location.cgi_path, location.cgi_extension);
 				}
 				else
 				{

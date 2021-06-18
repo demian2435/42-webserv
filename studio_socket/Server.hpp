@@ -233,7 +233,7 @@ public:
 							// Mandiamo la risposta al client,
 							// per capire a quale server è stata inviata la richiesta andiamo a vedere nella mappa a quale configurazione equivale la porta della richiesta
 							client_map[i].getResponse(conf);
-							std::cout << GREEN << client_map[i].res.out << RESET << std::endl;
+							//std::cout << GREEN << client_map[i].res.out << RESET << std::endl;
 							if (send(i, client_map[i].res.out.c_str(), client_map[i].res.out.length(), 0) == -1)
 							{
 								std::cout << "ERRORE SEND" << std::endl;
