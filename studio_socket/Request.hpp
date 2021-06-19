@@ -6,7 +6,7 @@
 /*   By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/19 11:37:01 by dmalori          ###   ########.fr       */
+/*   Updated: 2021/06/19 15:39:47 by dmalori          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ public:
 	std::string					body;
 	std::vector<std::string>	var;
 	bool						upload;
+	bool						delete_file;
 	std::string					filename;
 	std::string					buff;
 
@@ -83,6 +84,7 @@ public:
 		this->path = "";
 		this->body = "";
 		this->upload = false;
+		this->delete_file = false;
 		this->filename = "";
 		this->buff = "";
 	}
@@ -92,6 +94,7 @@ public:
 		this->content_length = 0;
 		this->host_port = 0;
 		this->upload = false;
+		this->delete_file = false;
 		this->buff = str;
 
 		int i = 0;
@@ -494,6 +497,23 @@ public:
 						this->method_path += '*';
 					}
 				}
+		}
+		if (!(this->method.compare("DELETE")))
+		{
+			this->delete_file = true;
+			if (this->method_path[this->method_path.length() - 1] != '/')
+			{
+				size_t size = this->method_path.length();
+				size_t del;
+				while (this->method_path[size] != '/')
+					size--;
+				size++;
+				del = size;
+				while (size < this->method_path.length())
+					this->filename += this->method_path[size++];
+				this->method_path.erase(del, this->method_path.length() - del);
+				this->method_path += '*';
+			}
 		}
 		if (this->method_path.compare(""))
 		{

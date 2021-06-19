@@ -258,12 +258,11 @@ public:
 					// per capire a quale server è stata inviata la richiesta andiamo a vedere nella mappa a quale configurazione equivale la porta della richiesta
 					client_map[i].getResponse(conf);
 					std::cout << GREEN << client_map[i].res.out << RESET << std::endl;
-					if (send(i, client_map[i].res.out.c_str(), client_map[i].res.out.length(), 0) == -1)
-					{
-						std::cout << "ERRORE SEND" << std::endl;
-					}
+					send(i, client_map[i].res.out.c_str(), client_map[i].res.out.length(), 0);
 					if (client_map[i].req.upload && client_map[i].res.res_code == 200)
 						FileUpload file(client_map[i].req);
+					if (client_map[i].req.delete_file && client_map[i].res.res_code == 200)
+						std::cout << "CANCELLARE IL FILE: " << client_map[i].req.filename << std::endl;
 					std::cout << "Chiudiamo la connessione al socket " << i << std::endl;
 					// Chiudiamo la connessione
 					close(i);
