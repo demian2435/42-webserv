@@ -287,8 +287,6 @@ class Response
 		{
 			std::string ret;
 			const char alphanum[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-			
-			srand((unsigned)time(NULL) * getpid());
 
 			for (int i = 0; i < 50; ++i) 
 				ret.push_back(alphanum[rand() % (sizeof(alphanum) - 1)]);

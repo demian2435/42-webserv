@@ -26,7 +26,7 @@
 #include "Server.hpp"
 #include "Request.hpp"
 
-#define PHP_GCI_PATH ("/Users/" + std::string(getenv("USER")) +  "/goinfre/._brew/bin/php-cgi")
+#define PHP_GCI_PATH ("/Users/" + std::string(getenv("USER")) +  "/goinfre/.brew/bin/php-cgi")
 class CgiManager
 {
 public:
@@ -52,7 +52,7 @@ public:
         char **cmd = vecToCmd(req.var, cgi_path, path);
         int fd = open(".__DamSuperCarino__", O_RDWR| O_CREAT | O_TRUNC , 0777);
         in_file(req);
-        int in = open(".__in_post__", O_RDONLY);
+        int in = open(".__in_file__", O_RDONLY);
         pid = fork();
         std::stringstream buffer;
         if (!pid)
