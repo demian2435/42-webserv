@@ -117,6 +117,54 @@ public:
         return buffer.str();
     }
 
+	static std::string  solve_bla_string(std::string str, Request &req, std::string const &cgi_path)
+	{
+        pid_t pid;
+		std::ofstream out(".__in_file__", std::ofstream::out);
+        out << str;
+        out.close();
+        char **cmd = vecToCmd(req.var, cgi_path, ".__in_file__");
+        int fd = open(".__DamSuperCarino__", O_RDWR| O_CREAT | O_TRUNC , 0777);
+        int in = open(".__in_file__", O_RDONLY);
+        pid = fork();
+        std::stringstream buffer;
+        std::string result;
+        if (!pid)
+        {
+            std::stringstream sstr, len;
+            len << req.body.length();
+            putenv((char *)("PATH_INFO=/"));
+            putenv((char *)("SERVER_PROTOCOL=HTTP/1.1"));
+            putenv((char *)("REQUEST_METHOD=" + req.method).c_str());
+            putenv((char *)("GATEWAY_INTERFACE=CGI/1.1"));
+            putenv((char *)("CONTENT_TYPE=" + req.content_type).c_str());
+            putenv((char *)("CONTENT_LENGTH=" + len.str()).c_str());
+			std::cout << RED << len.str() << RESET << std::endl;
+            extern char **environ;
+            dup2(fd, STDOUT_FILENO);
+            dup2(in,STDIN_FILENO);
+            close(in);
+            execve(cgi_path.c_str(), cmd, environ);
+            std::cout << "FATAL ERROR" << std::endl;
+            std::cout << errno << std::endl;
+        }
+        else
+        {
+            waitpid(pid, NULL, 0);
+            close(fd);
+            std::ifstream t(".__DamSuperCarino__", std::ifstream::in);
+            buffer << t.rdbuf();
+            result = buffer.str();
+            size_t pos = result.find("\r\n\r\n", 4);
+            result = result.substr(pos + 4);
+            t.close();
+        }
+        for (size_t i = 0; cmd[i]; i++)
+            free(cmd[i]);
+        free(cmd);
+        return result;
+    }
+
     static std::string  solve_bla(std::string path, Request &req, std::string const &cgi_path)
     {
         pid_t pid;

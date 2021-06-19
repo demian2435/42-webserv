@@ -98,7 +98,7 @@ class Response
 					if(!this->request.content_type.compare(0, 9, "test/file"))
 					{
 						std::cout << "PARSARE IL BODY E REINSERIRLO NELLA RISPOSTA" << std::endl;
-						out = "NULL";
+						out = CgiManager::solve_bla_string(this->request.body, this->request, location.cgi_path) + "\n";
 					}
 					else
 						out = CgiManager::solve_all(path, this->request, location.cgi_path, location.cgi_extension);
