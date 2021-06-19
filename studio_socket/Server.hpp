@@ -263,7 +263,7 @@ public:
 						FileUpload file(client_map[i].req);
 					if (client_map[i].req.delete_file && client_map[i].res.res_code == 200)
 					{
-						std::cout << "DELETE FILE" << std::endl;
+						//std::cout << "DELETE FILE" << std::endl;
 						std::string cmd;
 						cmd.append("rm -rf ./upload/");
 						cmd.append(client_map[i].req.filename);
