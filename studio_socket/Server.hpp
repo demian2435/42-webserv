@@ -23,9 +23,13 @@ private:
 	//---------------VARIABILI----------------//
 	Config conf;
 	// Contenitore per i file descriptor che arriveranno
-	fd_set temp_fd;
+	fd_set temp_read_fd;
+	// Contenitore per i file descriptor che aspetteranno una risposta
+	fd_set temp_write_fd;
 	// Contenitore di backup, cosi da controllare le differenze nel tempo
-	fd_set base_fd;
+	fd_set base_read_fd;
+	// Contenitore di backup, cosi da controllare le differenze nel tempo
+	fd_set base_write_fd;
 	// Contenitore per gestire multiport server
 	fd_set server_fd;
 	// Mappa per ritrovare il server dalla porta
@@ -44,8 +48,6 @@ private:
 	socklen_t addrlen;
 	// Buffer data
 	char buff[BUFFER_SIZE];
-	// Lughezza buffer data
-	int nbytes;
 	// Variabile per impostare il setsockopt
 	int yes;
 	// porta su cui montare il server
@@ -74,8 +76,10 @@ public:
 		timeout = 30;
 		
 		// Azzeriamo i set
-		FD_ZERO(&temp_fd);
-		FD_ZERO(&base_fd);
+		FD_ZERO(&temp_write_fd);
+		FD_ZERO(&temp_read_fd);
+		FD_ZERO(&base_read_fd);
+		FD_ZERO(&base_write_fd);
 
 		for (size_t i = 0; i < conf.server.size(); i++)
 		{
@@ -141,7 +145,7 @@ public:
 		}
 
 		// Aggiungiamo il listener al set di base
-		FD_SET(listener, &base_fd);
+		FD_SET(listener, &base_read_fd);
 		// Per multi port server
 		FD_SET(listener, &server_fd);
 		// Inizializziamo l'fdMax con il valore FD più alto attualmente e poiche abbiamo solo
@@ -170,7 +174,8 @@ public:
 			s_timeout.tv_usec = 0;
 			// Copiamo il set di base dentro al set degli fd da monitorare poichè select lascia nel set solo
 			// gli FD che hannno ricevuto un cambio di stato, eliminando il resto
-			temp_fd = base_fd;
+			temp_read_fd = base_read_fd;
+			temp_write_fd = base_write_fd;
 			// Select ritorna quando un qualsiasi socket dentro il SET da monitorare cambia stato
 			// 0: il valore deve corrispondere all'FD più grande + 1
 			// 1: è il set che contiene gli FD che attiveranno Select quando conterranno dati da leggere
@@ -178,7 +183,7 @@ public:
 			// 3: è il set degli FD che attiveranno Select quando genereranno condizioni di errore
 			// 4: è il timeout, una volta esaurito la funzione ritorna, ovviamente se nulla è cambiato il successivo
 			// codice non produrrà nessun risultato
-			if (select(fdMax + 1, &temp_fd, NULL, NULL, &s_timeout) == -1)
+			if (select(fdMax + 1, &temp_read_fd, &temp_write_fd, NULL, &s_timeout) == -1)
 			{
 				std::cout << "ERRORE SELECT" << std::endl;
 				return (1);
@@ -187,7 +192,7 @@ public:
 			for (int i = 0; i <= fdMax; i++)
 			{
 				// Andiamo a controllare se l'index i è un FD contenuto nel Set che stiamo monitorando
-				if (FD_ISSET(i, &temp_fd))
+				if (FD_ISSET(i, &temp_read_fd))
 				{
 					// Se è il server, significa che è stato contattato da una nuova connessione
 					if (FD_ISSET(i, &server_fd))
@@ -202,7 +207,7 @@ public:
 						else
 						{
 							// Inseriamo il nuovo FD nella lista base
-							FD_SET(newfd, &base_fd);
+							FD_SET(newfd, &base_read_fd);
 							// Se il nuovo FD supera il maxFd attuale lo aggiorniamo
 							if (newfd > fdMax)
 								fdMax = newfd;
@@ -217,49 +222,55 @@ public:
 						 // dati da leggere pendenti
 					{
 						// Leggiamo il buffer inviatoci dal client (In caso 0 o -1 chiudiamo la connessione)
-						nbytes = recv(i, buff, sizeof(buff), 0);
+						client_map[i].nbytes = recv(i, buff, sizeof(buff), 0);
 
-						if (nbytes > 0) // Se l lettura è andata a buon fine parsiamo la richiesta e rispondiamo al client
+						if (client_map[i].nbytes > 0) // Se l lettura è andata a buon fine parsiamo la richiesta e rispondiamo al client
 						{
-							client_map[i].appendBuffer(buff, nbytes);
+							client_map[i].appendBuffer(buff);
 						}
 						if (client_map[i].header_ok() && client_map[i].isReady())
 						{
-							std::cout << "Messaggio del client: " << i << std::endl;
-							if (!(client_map[i].req.transfer_encoding.compare(0, 7, "chunked")))
-								parse_chunked(client_map[i]);
-							std::cout << client_map[i].getHeader() << std::endl;
-							// std::cout << client_map[i].req.body <<std::endl;
-							// Mandiamo la risposta al client,
-							// per capire a quale server è stata inviata la richiesta andiamo a vedere nella mappa a quale configurazione equivale la porta della richiesta
-							client_map[i].getResponse(conf);
-							std::cout << GREEN << client_map[i].res.out << RESET << std::endl;
-							if (send(i, client_map[i].res.out.c_str(), client_map[i].res.out.length(), 0) == -1)
-							{
-								std::cout << "ERRORE SEND" << std::endl;
-							}
-							if (client_map[i].req.upload && client_map[i].res.res_code == 200)
-								FileUpload file(client_map[i].req);
-							std::cout << "Chiudiamo la connessione al socket " << i << std::endl;
-							// Chiudiamo la connessione
-							close(i);
-							// Eliminiamo l'FD dal set base
-							FD_CLR(i, &base_fd);
-							client_map.erase(i);
-							// Non abbiamo bisogno di aggiorare maxFd poichè non nuoce controllare qualche fd in più
+							FD_CLR(i, &base_read_fd);
+							FD_SET(i, &base_write_fd);
 						}
-						if (nbytes <= 0)
+						if (client_map[i].nbytes <= 0)
 						{
 							// Conessione chiusa dal client se 0 size
 							std::cout << "Connessione chiusa dal socket " << i << std::endl;
 							// Chiudiamo la connessione
 							close(i);
 							// Eliminiamo l'FD dal set base
-							FD_CLR(i, &base_fd);
+							FD_CLR(i, &base_read_fd);
 							client_map.erase(i);
 							// Non abbiamo bisogno di aggiorare maxFd poichè non nuoce controllare qualche fd in più
 						}
 					}
+				}
+				// Andiamo a controllare se l'index i è un FD contenuto nel Set che stiamo monitorando
+				if (FD_ISSET(i, &temp_write_fd))
+				{
+					std::cout << "Messaggio del client: " << i << std::endl;
+					if (!(client_map[i].req.transfer_encoding.compare(0, 7, "chunked")))
+						parse_chunked(client_map[i]);
+					std::cout << client_map[i].getHeader() << std::endl;
+					// std::cout << client_map[i].req.body <<std::endl;
+					// Mandiamo la risposta al client,
+					// per capire a quale server è stata inviata la richiesta andiamo a vedere nella mappa a quale configurazione equivale la porta della richiesta
+					client_map[i].getResponse(conf);
+					std::cout << GREEN << client_map[i].res.out << RESET << std::endl;
+					if (send(i, client_map[i].res.out.c_str(), client_map[i].res.out.length(), 0) == -1)
+					{
+						std::cout << "ERRORE SEND" << std::endl;
+					}
+					if (client_map[i].req.upload && client_map[i].res.res_code == 200)
+						FileUpload file(client_map[i].req);
+					std::cout << "Chiudiamo la connessione al socket " << i << std::endl;
+					// Chiudiamo la connessione
+					close(i);
+					// Eliminiamo l'FD dal set base
+					FD_CLR(i, &base_write_fd);							
+					client_map.erase(i);
+					// Non abbiamo bisogno di aggiorare maxFd poichè non nuoce controllare qualche fd in più
 				}
 			}
 		}

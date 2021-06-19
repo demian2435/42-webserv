@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aduregon <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/19 09:43:07 by aduregon         ###   ########.fr       */
+/*   Updated: 2021/06/19 11:37:01 by dmalori          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -216,7 +216,7 @@ public:
 				}
 				this->content_length = std::stoi(tmp);
 			}
-			else if (!(str.compare(i, 13, "Content-Type:")))
+			else if (!(str.compare(i, 13, "Content-Type:")) || !(str.compare(i, 13, "content-type:")))
 			{
 				while (str[i] != 32)
 					i++;
