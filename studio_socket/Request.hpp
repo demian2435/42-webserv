@@ -6,7 +6,7 @@
 /*   By: aduregon <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/09 11:59:50 by aduregon          #+#    #+#             */
-/*   Updated: 2021/06/19 09:33:17 by aduregon         ###   ########.fr       */
+/*   Updated: 2021/06/19 09:43:07 by aduregon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,6 +101,11 @@ public:
 			{
 				while (str[i] && str[i] != 32)
 				{
+					if (str[i] == '\r')
+					{
+						i++;
+						continue ;
+					}
 					this->method +=  str[i];
 					i++;
 				}
@@ -218,6 +223,11 @@ public:
 				i++;
 				while (str[i] != '\n')
 				{
+					if (str[i] == '\r')
+					{
+						i++;
+						continue ;
+					}
 					this->content_type += str[i];
 					i++;
 				}
@@ -273,6 +283,11 @@ public:
 				i++;
 				while (str[i] != '\n')
 				{
+					if (str[i] == '\r')
+					{
+						i++;
+						continue ;
+					}
 					this->transfer_encoding += str[i];
 					i++;
 				}
@@ -459,13 +474,10 @@ public:
 	
 	void	parse_request()
 	{
-		if (!(this->transfer_encoding.compare(0, 7, "chunked")) && this->transfer_encoding.size() >= 8)
-			this->transfer_encoding.erase(7, this->transfer_encoding.size() - 7);
-		
 		if (!(this->method.compare("PUT")))
 		{
 			if ((this->content_length != 0 && this->content_type.compare("")) ||
-				!(this->transfer_encoding.compare(0, 7, "chunked")))
+				!(this->transfer_encoding.compare("chunked")))
 				{
 					this->upload = true;
 					if (this->method_path[this->method_path.length() - 1] != '/')

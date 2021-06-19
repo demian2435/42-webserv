@@ -318,7 +318,7 @@ class Response
 					this->out = this->intestation + "\n" + this->content_type + "\n" + this->content_len + "\n" +this->connection;
 					// generates cookie if needed
 					if (r.cookie.find("_id=") == std::string::npos)
-						this->out += "Set-Cookie: _id=" + generate_cookie(); //+ "\n";
+						this->out += "\nSet-Cookie: _id=" + generate_cookie(); //+ "\n";
 					this->out += "\n\n" + this->body;
 				}
 			}
