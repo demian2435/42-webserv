@@ -262,7 +262,13 @@ public:
 					if (client_map[i].req.upload && client_map[i].res.res_code == 200)
 						FileUpload file(client_map[i].req);
 					if (client_map[i].req.delete_file && client_map[i].res.res_code == 200)
-						std::cout << "CANCELLARE IL FILE: " << client_map[i].req.filename << std::endl;
+					{
+						//std::cout << "DELETE FILE" << std::endl;
+						std::string cmd;
+						cmd.append("rm -rf ./upload/");
+						cmd.append(client_map[i].req.filename);
+						system(cmd.c_str());
+					}
 					std::cout << "Chiudiamo la connessione al socket " << i << std::endl;
 					// Chiudiamo la connessione
 					close(i);
