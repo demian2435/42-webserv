@@ -215,7 +215,7 @@ public:
 							Client c(i, port_server[i], newfd, addrlen, clientAddr);
 							client_map[newfd] = c;
 
-							std::cout << "Nuova connessione da " << c.getIp() << " sul socket " << c.fd_client << std::endl;
+							std::cout << BLUE << "Nuova connessione da " << c.getIp() << " sul socket " << c.fd_client << RESET << std::endl;
 						}
 					}
 					else // Se è Client significa che vuole dirci qualcosa, poichè il set minitora se ci sono
@@ -236,7 +236,7 @@ public:
 						if (client_map[i].nbytes <= 0)
 						{
 							// Conessione chiusa dal client se 0 size
-							std::cout << "Connessione chiusa dal socket " << i << std::endl;
+							std::cout << BLUE << "Connessione chiusa dal socket " << i << RESET << std::endl;
 							// Chiudiamo la connessione
 							close(i);
 							// Eliminiamo l'FD dal set base
@@ -249,7 +249,7 @@ public:
 				// Andiamo a controllare se l'index i è un FD contenuto nel Set che stiamo monitorando
 				if (FD_ISSET(i, &temp_write_fd))
 				{
-					std::cout << "Messaggio del client: " << i << std::endl;
+					std::cout << YELLOW << "REQUEST del client: " << i << RESET << std::endl;
 					if (!(client_map[i].req.transfer_encoding.compare(0, 7, "chunked")))
 						parse_chunked(client_map[i]);
 					std::cout << client_map[i].getHeader() << std::endl;
@@ -257,19 +257,19 @@ public:
 					// Mandiamo la risposta al client,
 					// per capire a quale server è stata inviata la richiesta andiamo a vedere nella mappa a quale configurazione equivale la porta della richiesta
 					client_map[i].getResponse(conf);
+					std::cout << YELLOW << "RESPONSE al client: " << i << RESET << std::endl;
 					std::cout << GREEN << client_map[i].res.out << RESET << std::endl;
 					send(i, client_map[i].res.out.c_str(), client_map[i].res.out.length(), 0);
 					if (client_map[i].req.upload && client_map[i].res.res_code == 200)
 						FileUpload file(client_map[i].req);
 					if (client_map[i].req.delete_file && client_map[i].res.res_code == 200)
 					{
-						//std::cout << "DELETE FILE" << std::endl;
 						std::string cmd;
 						cmd.append("rm -rf ./upload/");
 						cmd.append(client_map[i].req.filename);
 						system(cmd.c_str());
 					}
-					std::cout << "Chiudiamo la connessione al socket " << i << std::endl;
+					std::cout << BLUE << "Chiudiamo la connessione al socket " << i << RESET << std::endl;
 					// Chiudiamo la connessione
 					close(i);
 					// Eliminiamo l'FD dal set base

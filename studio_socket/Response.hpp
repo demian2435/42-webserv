@@ -14,6 +14,8 @@
 #define DEFAULT_405 "<html><h1>ERROR 405 METHOD NOT ALLOWED</h1></html>\n"
 #define PHP 1
 #define BLA 2
+//DEBUG
+#define debug false
 
 class Request;
 
@@ -61,8 +63,8 @@ class Response
 
 		std::string	read_path(std::string path, int code, Location location)
 		{
-			//std::cout << path;
-			std::cout << YELLOW << path << " - " << code << RESET << std::endl;
+			if (debug)
+				std::cout << YELLOW << path << " - " << code << RESET << std::endl;
 			std::ifstream	myfile(path);
 			std::string		buff;
 			std::string		out;
@@ -134,9 +136,6 @@ class Response
 		//GENERA IL BODY DI RISPOSTA IN BASE ALLA RICHIESTA EFFETTUATA
 		std::string	take_body(Config_Server c, Request r)
 		{
-			//Set true this to debug
-			bool	debug = true;
-
 			if (!(r.is_valid()) && read_path(c.error_pages.getPath(400), 400, Location()) != "")
 				return read_path(c.error_pages.getPath(400), 400, Location());
 			else if (!(r.is_valid()))
