@@ -1,8 +1,4 @@
-<html>
- <head>
-  <title>PHP Test</title>
- </head>
- <body>
- <p>Hello World</p> 
- </body>
-</html>
+Status: 200 OK
+Content-Type: text/html; charset=utf-8
+
+TEST PER DIMOSTRARE CHE LA CGI DI BLA FUNZIONA 123 123 123

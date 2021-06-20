@@ -249,16 +249,17 @@ public:
 				// Andiamo a controllare se l'index i è un FD contenuto nel Set che stiamo monitorando
 				if (FD_ISSET(i, &temp_write_fd))
 				{
+					client_map[i].getRequest();
 					std::cout << YELLOW << "REQUEST del client: " << i << RESET << std::endl;
 					if (!(client_map[i].req.transfer_encoding.compare(0, 7, "chunked")))
 						parse_chunked(client_map[i]);
 					std::cout << client_map[i].getHeader() << std::endl;
-					// std::cout << client_map[i].req.body <<std::endl;
+					//std::cout << client_map[i].req.body <<std::endl;
 					// Mandiamo la risposta al client,
 					// per capire a quale server è stata inviata la richiesta andiamo a vedere nella mappa a quale configurazione equivale la porta della richiesta
 					client_map[i].getResponse(conf);
 					std::cout << YELLOW << "RESPONSE al client: " << i << RESET << std::endl;
-					std::cout << GREEN << client_map[i].res.out << RESET << std::endl;
+					std::cout << client_map[i].res.out << std::endl;
 					send(i, client_map[i].res.out.c_str(), client_map[i].res.out.length(), 0);
 					if (client_map[i].req.upload && client_map[i].res.res_code == 200)
 						FileUpload file(client_map[i].req);

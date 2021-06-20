@@ -309,14 +309,14 @@ class Response
 				this->content_type = "Content-Type: text/html";
 				this->out = "";
 				if (this->oversize || r.method == "HEAD")
-					this->out = this->intestation + "\n" +this->connection + "\n\n";
+					this->out = this->intestation + "\n" +this->connection + "\r\n\r\n";
 				else
 				{
 					this->out = this->intestation + "\n" + this->content_type + "\n" + this->content_len + "\n" +this->connection;
 					// generates cookie if needed
 					if (r.cookie.find("_id=") == std::string::npos)
 						this->out += "\nSet-Cookie: _id=" + generate_cookie(); //+ "\n";
-					this->out += "\n\n" + this->body;
+					this->out += "\r\n\r\n" + this->body;
 				}
 			}
 			else
