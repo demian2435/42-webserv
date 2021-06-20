@@ -33,20 +33,20 @@ public:
     typedef std::pair<std::string, std::string>     Tpair;
     static Tpair      solve_all(std::string const &path, Request &req, std::string const &cgi_path, std::string const &cgi_extension = ".php")
     {
-        if (!cgi_extension.compare(".php"))
-               return  solve_php(path, req, cgi_path);
+        if (!cgi_extension.compare(".php") || !cgi_extension.compare(".py"))
+            return  solve_php(path, req, cgi_path, cgi_extension);
         else if (!cgi_extension.compare(".bla") && !req.method.compare("POST"))
-                return (solve_php(path, req, cgi_path));
+                return (solve_php(path, req, cgi_path, cgi_extension));
         else if (!cgi_extension.compare(".bla"))
-            return (solve_php(path, req, cgi_path));
+            return (solve_bla(path, req, cgi_path));
         return Tpair();
     }
-    static Tpair      solve_php(std::string const &path, Request &req, std::string const &cgi_path)
+    static Tpair      solve_php(std::string const &path, Request &req, std::string const &cgi_path, std::string const &cgi_extension)
     {
         if (!req.method.compare("POST"))
             return (solve_php_POST(path, req, cgi_path));
         else if (!req.method.compare("GET"))
-            return (solve_php_GET(path, req, cgi_path, req.var));
+            return (solve_php_GET(path, req, cgi_path, req.var ,cgi_extension));
         return Tpair();
     }
 
@@ -115,10 +115,14 @@ public:
         free(cmd);
         return Tpair(head, result);
     }
-    static Tpair     solve_php_GET(std::string const & path, Request &req, std::string const &cgi_path, std::vector<std::string> const & vec)
+    static Tpair     solve_php_GET(std::string const & path, Request &req, std::string const &cgi_path, std::vector<std::string> const & vec, std::string const &cgi_extension)
     {
         pid_t pid;
-        char **cmd = vecToCmd(vec, cgi_path, path);
+        char **cmd;
+        if (cgi_extension==".py")
+            cmd = vecToCmdpy(vec, cgi_path, path);
+        else
+            cmd = vecToCmd(vec, cgi_path, path);
         int fd = open(".__DamSuperCarino__", O_RDWR| O_CREAT | O_TRUNC , 0777);
         std::stringstream buffer;
         std::string self = req.path;
@@ -230,14 +234,31 @@ public:
     }
     static char **vecToCmd(std::vector<std::string> const & vec, std::string const & cgi_path, std::string const & path)
     {
-        int std_args = 3;
+        int std_args = 2;
         char **cmd = (char **)malloc(sizeof(char *) * (vec.size() + std_args + 1));
         cmd[0] = strdup((char *)(cgi_path).c_str());
-        cmd[1] = strdup((char *)"-f");
-        cmd[2] = strdup(path.c_str());
+        cmd[1] = strdup(path.c_str());
         for(size_t i=0; i < vec.size(); i++)
             cmd[i+std_args] = strdup((vec[i].c_str()));
         cmd[vec.size() + std_args] = 0;
+        return cmd;
+    }
+    static char **vecToCmdpy(std::vector<std::string> const & vec, std::string const & cgi_path, std::string const & path)
+    {
+        int std_args = 2;
+        std::string tmp = "";
+        char **cmd = (char **)malloc(sizeof(char *) * (vec.size() + std_args + 1));
+        cmd[0] = strdup((char *)(cgi_path).c_str());
+        // cmd[1] = strdup((char *)"-f");
+        cmd[1] = strdup(path.c_str());
+        for (size_t i=0; i < vec.size(); i++)
+        {
+            if (i > 0)
+                tmp += "&";
+            tmp += vec[i];
+        }
+        cmd[2] = strdup(tmp.c_str());
+        cmd[3] = 0;
         return cmd;
     }
     static void in_file(Request &req)
