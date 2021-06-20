@@ -22,15 +22,15 @@ form {text-align: center;}
 <div>
 <?php
 if(!isset($_COOKIE["name"])) {
-  echo "<h1>Ciao, straniero. Qual e' il tuo nome?</h1>";
-  echo '<form action="';
-  echo $_SERVER['PHP_SELF'];
-  echo '" method="POST">
-	Nome: <input type="text" name="name">
-	<input type="submit">
-	</form>';
+    echo "<h1>Ciao, straniero. Qual e' il tuo nome?</h1>";
+    echo '<form action="';
+    echo $_SERVER['PHP_SELF'];
+    echo '" method="POST">
+	  Nome: <input type="text" name="name">
+	  <input type="submit">
+	  </form>';
 } else {
-  echo "<h1>Ciao " . $_COOKIE["name"] . ", bentornato.</h1>";
+    echo "<h1>Ciao " . $_COOKIE["name"] . ", bentornato.</h1>";
 }
 ?>
 </div>
