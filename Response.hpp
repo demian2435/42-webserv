@@ -30,8 +30,9 @@ class Response
 		std::string			status;
 		std::string			content_len;
 		std::string			content_type;
-		std::string			connection;
+        std::string         connection;
 		std::string			body;
+		std::pair<std::string, std::string> cgi_response;
 		bool				oversize;
 		bool				redirection;
 
@@ -88,7 +89,8 @@ class Response
 				this->redirection = true;
 				return "";
 			}
-			
+
+			cgi_response.first = "";
 			if (myfile.good())
 			{
 				//std::cout << BOLDMAGENTA << location.cgi_extension.compare(extension(path)) << RESET << std::endl;
@@ -98,9 +100,16 @@ class Response
 				if (location.cgi_path != "" && location.cgi_extension != "" && !location.cgi_extension.compare(extension(path)))
 				{
 					if(!this->request.content_type.compare(0, 9, "test/file"))
-						out = CgiManager::solve_bla_string(this->request.body, this->request, location.cgi_path) + "\n";
+					{
+						std::cout << "PARSARE IL BODY E REINSERIRLO NELLA RISPOSTA" << std::endl;
+//						cgi_response = CgiManager::solve_bla_string(this->request.body, this->request, location.cgi_path);
+//						out = cgi_response.second;
+					}
 					else
-						out = CgiManager::solve_all(path, this->request, location.cgi_path, location.cgi_extension);
+					{
+					    cgi_response = CgiManager::solve_all(path, this->request, location.cgi_path, location.cgi_extension);
+                        out = cgi_response.second;
+                    }
 				}
 				else
 				{
@@ -310,14 +319,18 @@ class Response
 				else
 				{
 					this->out = this->intestation + "\n" + this->content_type + "\n" + this->content_len + "\n" +this->connection;
+					if (cgi_response.first != "")
+					    this->out += "\n" + cgi_response.first;
 					// generates cookie if needed
 					if (r.cookie.find("_id=") == std::string::npos)
-						this->out += "\nSet-Cookie: _id=" + generate_cookie();
+						this->out += "\nSet-Cookie: _id=" + generate_cookie(); //+ "\n";
 					this->out += "\r\n\r\n" + this->body;
 				}
 			}
 			else
+			{
 				this->out = this->intestation + "\n";
+			}
 		}
 		//~Response();
 };

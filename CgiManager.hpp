@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CgiManager.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: forsili <forsili@student.42.fr>            +#+  +:+       +#+        */
+/*   By: dmalori <dmalori@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/06/14 16:30:33 by sgiovo            #+#    #+#             */
-/*   Updated: 2021/06/20 14:25:40 by forsili          ###   ########.fr       */
+/*   Updated: 2021/06/20 16:28:16 by dmalori          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,43 +30,64 @@
 class CgiManager
 {
 public:
-    static std::string      solve_all(std::string path, Request &req, std::string const &cgi_path, std::string const &cgi_extension = ".php")
+    typedef std::pair<std::string, std::string>     Tpair;
+    static Tpair      solve_all(std::string const &path, Request &req, std::string const &cgi_path, std::string const &cgi_extension = ".php")
     {
         if (!cgi_extension.compare(".php"))
                return  solve_php(path, req, cgi_path);
-        if (!cgi_extension.compare(".bla"))
-                return (solve_bla(path, req, cgi_path));
-        return "";
+        else if (!cgi_extension.compare(".bla") && !req.method.compare("POST"))
+                return (solve_php(path, req, cgi_path));
+        else if (!cgi_extension.compare(".bla"))
+            return (solve_php(path, req, cgi_path));
+        return Tpair();
     }
-    static std::string      solve_php(std::string path, Request &req, std::string const &cgi_path)
+    static Tpair      solve_php(std::string const &path, Request &req, std::string const &cgi_path)
     {
         if (!req.method.compare("POST"))
             return (solve_php_POST(path, req, cgi_path));
         else if (!req.method.compare("GET"))
-            return (solve_php_GET(path, cgi_path, req.var));
-        return "";
+            return (solve_php_GET(path, req, cgi_path, req.var));
+        return Tpair();
     }
-    static std::string      solve_php_POST(std::string path, Request &req, std::string const & cgi_path)
+
+    static Tpair      solve_php_POST(std::string const & path, Request &req, std::string const & cgi_path)
     {
         pid_t pid;
         char **cmd = vecToCmd(req.var, cgi_path, path);
         int fd = open(".__DamSuperCarino__", O_RDWR| O_CREAT | O_TRUNC , 0777);
         in_file(req);
         int in = open(".__in_file__", O_RDONLY);
-        pid = fork();
+        std::string result, head;
+        std::stringstream sstr;
+        std::string fPath("SCRIPT_FILENAME=" + path);
+        std::string self = "http://" + req.host + req.path;
+        std::string cookie = req.cookie;
+        std::string cont_type = "CONTENT_TYPE=" + req.content_type;
+        std::string method = "REQUEST_METHOD=" + req.method;
+        std::string cont_len;
+        sstr << req.body.length();
+        cont_len = "CONTENT_LENGTH=" + sstr.str();
+        size_t pos;
+        while ((pos = self.find("\r")) != std::string::npos)
+            self.erase(pos, 1);
+        self = "PHP_SELF=" + self;
+        while ((pos = cookie.find("; ")) != std::string::npos)
+            cookie.replace(pos, 2, ";");
+        cookie = "HTTP_COOKIE=" + cookie;
         std::stringstream buffer;
+        pid = fork();
         if (!pid)
         {
-            std::stringstream sstr;
-            sstr << req.body.length();
-            std::string fPath("SCRIPT_FILENAME=");
-            fPath += path;
-            putenv((char *)("REDIRECT_STATUS=true"));
+            putenv((char *)("PATH_INFO=/"));
+            putenv((char *)self.c_str());
+            putenv((char *)cookie.c_str());
             putenv((char *)fPath.c_str());
-            putenv((char *)"REQUEST_METHOD=POST");
+            putenv((char *)cont_type.c_str());
+            putenv((char *)method.c_str());
+            putenv((char *)cont_len.c_str());
+            putenv((char *)("SERVER_PROTOCOL=HTTP/1.1"));
+            putenv((char *)("REDIRECT_STATUS=true"));
             putenv((char *)("GATEWAY_INTERFACE=CGI/1.1"));
-            putenv((char *)("CONTENT_TYPE=" + req.content_type).c_str());
-            putenv((char *)("CONTENT_LENGTH=" + sstr.str()).c_str());
             extern char **environ;
             dup2(fd, STDOUT_FILENO);
             dup2(in,STDIN_FILENO);
@@ -74,6 +95,7 @@ public:
             execve(cgi_path.c_str(), cmd, environ);
             std::cout << "FATAL ERROR" << std::endl;
             std::cout << errno << std::endl;
+            exit(1);
         }
         else
         {
@@ -81,72 +103,48 @@ public:
             close(fd);
             std::ifstream t(".__DamSuperCarino__", std::ifstream::in);
             buffer << t.rdbuf();
+            result = buffer.str();
+            size_t pos = result.find("\r\n\r\n", 4);
+            head = result.substr(0, pos);
+            head += "\nCookie:" + req.cookie;
+            result = result.substr(pos + 4);
             t.close();
         }
         for (size_t i = 0; cmd[i]; i++)
             free(cmd[i]);
         free(cmd);
-        return buffer.str();
+        return Tpair(head, result);
     }
-    static std::string     solve_php_GET(std::string path, std::string const &cgi_path, std::vector<std::string> const & vec)
+    static Tpair     solve_php_GET(std::string const & path, Request &req, std::string const &cgi_path, std::vector<std::string> const & vec)
     {
         pid_t pid;
         char **cmd = vecToCmd(vec, cgi_path, path);
         int fd = open(".__DamSuperCarino__", O_RDWR| O_CREAT | O_TRUNC , 0777);
         std::stringstream buffer;
+        std::string self = req.path;
+        std::string cookie = req.cookie;
+        std::string result, head;
+        std::string fPath("SCRIPT_FILENAME=" + path);
+        size_t pos;
+
+        while ((pos = self.find("\r")) != std::string::npos)
+            self.erase(pos, 1);
+        self = "PHP_SELF=" + self;
+        while ((pos = cookie.find("; ")) != std::string::npos)
+            cookie.replace(pos, 2, ";");
+        cookie = "HTTP_COOKIE=" + cookie;
+        //putenv((char *)fPath.c_str());
         pid = fork();
         if (!pid)
         {
+            putenv((char *)cookie.c_str());
+            putenv((char *)self.c_str());
             extern char **environ;
             dup2(fd, STDOUT_FILENO);
             execve(cmd[0], cmd, environ);
             std::cout << "FATAL ERROR" << std::endl;
             std::cout << errno << std::endl;
-        }
-        else
-        {
-            waitpid(pid, NULL, 0);
-            close(fd);
-            std::ifstream t(".__DamSuperCarino__", std::ifstream::in);
-            buffer << t.rdbuf();
-            t.close();
-        }
-        for (size_t i = 0; cmd[i]; i++)
-            free(cmd[i]);
-        free(cmd);
-        return buffer.str();
-    }
-
-	static std::string  solve_bla_string(std::string str, Request &req, std::string const &cgi_path)
-	{
-        pid_t pid;
-		std::ofstream out(".__in_file__", std::ofstream::out);
-        out << str;
-        out.close();
-        char **cmd = vecToCmd(req.var, cgi_path, ".__in_file__");
-        int fd = open(".__DamSuperCarino__", O_RDWR| O_CREAT | O_TRUNC , 0777);
-        int in = open(".__in_file__", O_RDONLY);
-        pid = fork();
-        std::stringstream buffer;
-        std::string result;
-        if (!pid)
-        {
-            std::stringstream sstr, len;
-            len << req.body.length();
-            putenv((char *)("PATH_INFO=/"));
-            putenv((char *)("SERVER_PROTOCOL=HTTP/1.1"));
-            putenv((char *)("REQUEST_METHOD=" + req.method).c_str());
-            putenv((char *)("GATEWAY_INTERFACE=CGI/1.1"));
-            putenv((char *)("CONTENT_TYPE=" + req.content_type).c_str());
-            putenv((char *)("CONTENT_LENGTH=" + len.str()).c_str());
-			std::cout << RED << len.str() << RESET << std::endl;
-            extern char **environ;
-            dup2(fd, STDOUT_FILENO);
-            dup2(in,STDIN_FILENO);
-            close(in);
-            execve(cgi_path.c_str(), cmd, environ);
-            std::cout << "FATAL ERROR" << std::endl;
-            std::cout << errno << std::endl;
+            exit(1);
         }
         else
         {
@@ -155,37 +153,56 @@ public:
             std::ifstream t(".__DamSuperCarino__", std::ifstream::in);
             buffer << t.rdbuf();
             result = buffer.str();
-            size_t pos = result.find("\r\n\r\n", 4);
-            result = result.substr(pos + 4);
+//            size_t pos = result.find(
+//                    "X-Powered-By: PHP/8.0.7\nContent-type: text/html; charset=UTF-8", 63);
+//            if (pos != std::string::npos)
+//                result = result.substr(pos + 63);
             t.close();
         }
         for (size_t i = 0; cmd[i]; i++)
             free(cmd[i]);
         free(cmd);
-        return result;
+        return Tpair(std::string(), result);
     }
 
-    static std::string  solve_bla(std::string path, Request &req, std::string const &cgi_path)
+    static Tpair  solve_bla(std::string const & path, Request &req, std::string const &cgi_path)
     {
         pid_t pid;
         char **cmd = vecToCmd(req.var, cgi_path, path);
         int fd = open(".__DamSuperCarino__", O_RDWR| O_CREAT | O_TRUNC , 0777);
         int in = open(path.c_str(), O_RDONLY);
-        pid = fork();
         std::stringstream buffer;
+        std::stringstream sstr;
+        std::string fPath("SCRIPT_FILENAME=" + path);
+        std::string self = "http://" + req.host + req.path;
+        std::string cookie = req.cookie;
+        std::string cont_type = "CONTENT_TYPE=" + req.content_type;
+        std::string method = "REQUEST_METHOD=" + req.method;
+        std::string cont_len;
+        sstr << req.body.length();
+        cont_len = "CONTENT_LENGTH=" + sstr.str();
+        size_t pos;
+        while ((pos = self.find("\r")) != std::string::npos)
+            self.erase(pos, 1);
+        self = "PHP_SELF=" + self;
+        while ((pos = cookie.find("; ")) != std::string::npos)
+            cookie.replace(pos, 2, ";");
+        cookie = "HTTP_COOKIE=" + cookie;
+        pid = fork();
         std::string result;
         if (!pid)
         {
-            std::stringstream sstr, len;
-            std::ifstream in_file(path);
-            sstr << in_file.rdbuf();
-            len << sstr.str().length();
             putenv((char *)("PATH_INFO=/"));
+            putenv((char *)cookie.c_str());
+            putenv((char *)fPath.c_str());
+            if (!req.method.compare("POST"))
+                putenv((char *)cont_type.c_str());
+            putenv((char *)self.c_str());
+            putenv((char *)method.c_str());
+            putenv((char *)cont_len.c_str());
             putenv((char *)("SERVER_PROTOCOL=HTTP/1.1"));
-            putenv((char *)("REQUEST_METHOD=" + req.method).c_str());
+            putenv((char *)("REDIRECT_STATUS=true"));
             putenv((char *)("GATEWAY_INTERFACE=CGI/1.1"));
-            putenv((char *)("CONTENT_TYPE=" + req.content_type).c_str());
-            putenv((char *)("CONTENT_LENGTH=" + len.str()).c_str());
             extern char **environ;
             dup2(fd, STDOUT_FILENO);
             dup2(in,STDIN_FILENO);
@@ -193,6 +210,7 @@ public:
             execve(cgi_path.c_str(), cmd, environ);
             std::cout << "FATAL ERROR" << std::endl;
             std::cout << errno << std::endl;
+            exit(1);
         }
         else
         {
@@ -208,7 +226,7 @@ public:
         for (size_t i = 0; cmd[i]; i++)
             free(cmd[i]);
         free(cmd);
-        return result;
+        return Tpair(std::string(), result);
     }
     static char **vecToCmd(std::vector<std::string> const & vec, std::string const & cgi_path, std::string const & path)
     {
@@ -229,4 +247,3 @@ public:
         out.close();
     }
 };
-

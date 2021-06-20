@@ -1,5 +1,5 @@
 <?php 
-    if (!isset($_GET['name']))
+    if (!isset($_POST['name']))
     {
         $out = '
         <form action="'.$_SERVER['PHP_SELF'].'" method="POST">

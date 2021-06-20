@@ -1,31 +1,6 @@
-<?php
-if (!isset($_COOKIE["name"]) and isset($_POST["name"])) {
-    // Set the cookie
-    setcookie("name", $_COOKIE['name'] = $_POST["name"], time()+3600);  /* expire in 1 hour */
-}
-?>
-<?php
-if(!isset($_COOKIE["name"])) {
-<<<<<<< HEAD
-  $ret =  "<h1 class=\"title\">Ciao, straniero. Qual e' il tuo nome?</h1>".'<form action="'.$_SERVER['PHP_SELF'].'" method="POST">
-	<input class="input" placeholder="Name" type="text" name="name">
-	<input class="button" type="submit"></input>
-	</form>';
-} else {
-  $ret = "<h1>Ciao " . $_COOKIE["name"] . ", bentornato.</h1>";
-=======
-    echo "<h1>Ciao, straniero. Qual e' il tuo nome?</h1>";
-    echo '<form action="';
-    echo $_SERVER['PHP_SELF'];
-    echo '" method="POST">
-	  Nome: <input type="text" name="name">
-	  <input type="submit">
-	  </form>';
-} else {
-    echo "<h1>Ciao " . $_COOKIE["name"] . ", bentornato.</h1>";
->>>>>>> a7ed716330a3499ec9e89844ced9ed6a039f61d5
-}
-?>
+X-Powered-By: PHP/8.0.7
+Content-type: text/html; charset=UTF-8
+
 
 <html>
 <head>
@@ -152,7 +127,9 @@ if(!isset($_COOKIE["name"])) {
                 <h1 class="title">42 WEBSERV by Pescara</h1>
                 <hr></hr>
             </div>
-                <?php echo $ret; ?>
-        </div>
+                <p>
+        DAMIANO non &egrave un attore che abbia bisogno di lunghe introduzioni o premesse: la sua carriera, iniziata nel 1984 con il primo capitolo della saga di Nightmare, ha lasciato una traccia abbastanza indelebile nel mondo della settima arte.
+        Sex Symbol, amato dalle folle e corteggiato da registi di un certo spessore, DAMIANO &egrave stato per anni considerato il miglior attore della sua generazione, a prescindere dai riconoscimenti canonici di Hollywood che non sono mai arrivati tra le sue mani.        
+        </p>        </div>
     </body>
 </html>
