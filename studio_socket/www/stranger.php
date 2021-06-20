@@ -6,12 +6,24 @@ if (!isset($_COOKIE["name"]) and isset($_POST["name"])) {
 ?>
 <?php
 if(!isset($_COOKIE["name"])) {
+<<<<<<< HEAD
   $ret =  "<h1 class=\"title\">Ciao, straniero. Qual e' il tuo nome?</h1>".'<form action="'.$_SERVER['PHP_SELF'].'" method="POST">
 	<input class="input" placeholder="Name" type="text" name="name">
 	<input class="button" type="submit"></input>
 	</form>';
 } else {
   $ret = "<h1>Ciao " . $_COOKIE["name"] . ", bentornato.</h1>";
+=======
+    echo "<h1>Ciao, straniero. Qual e' il tuo nome?</h1>";
+    echo '<form action="';
+    echo $_SERVER['PHP_SELF'];
+    echo '" method="POST">
+	  Nome: <input type="text" name="name">
+	  <input type="submit">
+	  </form>';
+} else {
+    echo "<h1>Ciao " . $_COOKIE["name"] . ", bentornato.</h1>";
+>>>>>>> a7ed716330a3499ec9e89844ced9ed6a039f61d5
 }
 ?>
 

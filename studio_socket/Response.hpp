@@ -98,10 +98,7 @@ class Response
 				if (location.cgi_path != "" && location.cgi_extension != "" && !location.cgi_extension.compare(extension(path)))
 				{
 					if(!this->request.content_type.compare(0, 9, "test/file"))
-					{
-						std::cout << "PARSARE IL BODY E REINSERIRLO NELLA RISPOSTA" << std::endl;
 						out = CgiManager::solve_bla_string(this->request.body, this->request, location.cgi_path) + "\n";
-					}
 					else
 						out = CgiManager::solve_all(path, this->request, location.cgi_path, location.cgi_extension);
 				}
@@ -315,14 +312,12 @@ class Response
 					this->out = this->intestation + "\n" + this->content_type + "\n" + this->content_len + "\n" +this->connection;
 					// generates cookie if needed
 					if (r.cookie.find("_id=") == std::string::npos)
-						this->out += "\nSet-Cookie: _id=" + generate_cookie(); //+ "\n";
+						this->out += "\nSet-Cookie: _id=" + generate_cookie();
 					this->out += "\r\n\r\n" + this->body;
 				}
 			}
 			else
-			{
 				this->out = this->intestation + "\n";
-			}
 		}
 		//~Response();
 };

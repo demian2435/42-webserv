@@ -65,7 +65,8 @@ private:
 
 	//----------------------PREPARAZIONE----------------------------//
 public:
-	Server(std::string _path = "./webserv.conf")
+	Server(){};
+	Server(std::string _path)
 	{
 		fdMax = -1;
 		for (int i = 0; i < BUFFER_SIZE; i++)
