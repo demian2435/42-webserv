@@ -1,3 +1,20 @@
+<?php 
+    if (!isset($_GET['name']))
+    {
+        $out = '
+        <form action="'.$_SERVER['PHP_SELF'].'" method="GET">
+        <input class="input" placeholder="Name" type="text" name="name">
+        <input class="button" type="submit"></input>
+        </form>';
+    }
+    else
+    {
+        $out = "<p>
+        " .$_GET['name']. " non &egrave un attore che abbia bisogno di lunghe introduzioni o premesse: la sua carriera, iniziata nel 1984 con il primo capitolo della saga di Nightmare, ha lasciato una traccia abbastanza indelebile nel mondo della settima arte.
+        Sex Symbol, amato dalle folle e corteggiato da registi di un certo spessore, ".$_GET['name']." &egrave stato per anni considerato il miglior attore della sua generazione, a prescindere dai riconoscimenti canonici di Hollywood che non sono mai arrivati tra le sue mani.        
+        </p>";
+    }
+?>
 
 <html>
 <head>
@@ -124,9 +141,7 @@
                 <h1 class="title">42 WEBSERV by Pescara</h1>
                 <hr></hr>
             </div>
-                <p>
-        Andrea Duregin non &egrave un attore che abbia bisogno di lunghe introduzioni o premesse: la sua carriera, iniziata nel 1984 con il primo capitolo della saga di Nightmare, ha lasciato una traccia abbastanza indelebile nel mondo della settima arte.
-        Sex Symbol, amato dalle folle e corteggiato da registi di un certo spessore, Andrea Duregin &egrave stato per anni considerato il miglior attore della sua generazione, a prescindere dai riconoscimenti canonici di Hollywood che non sono mai arrivati tra le sue mani.        
-        </p>        </div>
+                <?php echo $out; ?>
+        </div>
     </body>
 </html>

@@ -4,37 +4,143 @@ if (!isset($_COOKIE["name"]) and isset($_POST["name"])) {
     setcookie("name", $_COOKIE['name'] = $_POST["name"], time()+3600);  /* expire in 1 hour */
 }
 ?>
+<?php
+if(!isset($_COOKIE["name"])) {
+  $ret =  "<h1 class=\"title\">Ciao, straniero. Qual e' il tuo nome?</h1>".'<form action="'.$_SERVER['PHP_SELF'].'" method="POST">
+	<input class="input" placeholder="Name" type="text" name="name">
+	<input class="button" type="submit"></input>
+	</form>';
+} else {
+  $ret = "<h1>Ciao " . $_COOKIE["name"] . ", bentornato.</h1>";
+}
+?>
 
 <html>
 <head>
-<style>
-h1 {text-align: center;}
-form {text-align: center;}
-.container {
-  display: grid;
-  place-items: center;
-  height: 100%;
-}
-</style>
-</head>
-<body>
-<div class="container">
-<div>
-<?php
-if(!isset($_COOKIE["name"])) {
-  echo "<h1>Ciao, straniero. Qual e' il tuo nome?</h1>";
-  echo '<form action="';
-  echo $_SERVER['PHP_SELF'];
-  echo '" method="POST">
-	Nome: <input type="text" name="name">
-	<input type="submit">
-	</form>';
-} else {
-  echo "<h1>Ciao " . $_COOKIE["name"] . ", bentornato.</h1>";
-}
-?>
-</div>
-</div>
+    <title>Webserv homepage</title>
+    <style>
+        body{
+            text-align: center;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            color: white;
+        }
+        .button{
+            width: 100%;
+            background-color: white;
+            height: auto;
+            margin:auto
+            padding: 0.5%;
+            border-radius: 100px;
+            border-style: hidden;
+            overflow: auto;
+            margin-top: 4%;
+            font-size: 150%;
+        }
+        .main{
+            width:50%;
+            margin: auto;
+            margin-top: 20%;
+            padding: 2%;
+            box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+            border-radius: 10px;
+            overflow: auto;
+            background-image: linear-gradient( 135deg, #EE9AE5 10%, #5961F9 100%);
+        }
+        .button:hover{
+          width: 100%;
+            background-color: white;
+            height: auto;
+            margin:auto
+            padding: 0.5%;
+            border-radius: 100px;
+            border-style: hidden;
+            overflow: auto;
+            margin-top: 4%;
+            font-size: 150%;
+            box-shadow: 3px 5px 6px rgb(90, 90, 90);
+            border-style: hidden;
+        }
+        h2{
+            background: -webkit-linear-gradient(#EE9AE5, #5961F9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        #myVideo {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+        }
+        .image{
+            width: 15%;
+            border-radius: 15000%;
+            padding-top: 15%;
+            background-position:center;
+            background-repeat: no-repeat;
+            background-size: 100%;
+            opacity: 0.8;
+            margin-left: 1%;
+            margin-right: 1%;
+            -moz-box-shadow:    inset 0 0 10px #000000;
+            -webkit-box-shadow: inset 0 0 10px #000000;
+            box-shadow:         inset 0 0 10px #000000;
+            transition: transform .7s ease-in-out;
+            overflow: auto;
+        }
 
-</body>
+        .image:hover {
+            width: 15%;
+            border-radius: 15000%;
+            padding-top: 15%;
+            opacity: 1;
+            background-position:center;
+            background-repeat: no-repeat;
+            background-size: 100%;
+            margin-left: 1%;
+            margin-right: 1%;
+            box-shadow:         0px 0px 0px 0px #ccc;
+            transform: rotate(360deg);
+            overflow: auto;
+        }
+        .title{
+            color: white;
+            text-shadow: 2px 2px 4px rgb(104, 103, 103);
+            text-align: center;
+        }
+        hr{
+            border-top: 10% solid white;
+        }
+        .input{
+            width: 100%;
+            height: 2%;
+            border-radius: 1000px;
+            border-style: none;
+            outline: none;
+            padding-left: 3%;
+            padding-right: 3%;
+            overflow: hidden;
+            box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+        }
+    </style>
+</head>
+    <body>
+        <div class="main">
+            <div style="display: flex; padding: 2%; height: auto; overflow: hidden;">
+                <div class="image" style="background-image: url('https://avatars.githubusercontent.com/u/28110775?v=4');"></div>
+                <div class="image" style="background-image: url('https://avatars.githubusercontent.com/u/12715259?v=4');"></div>
+                <div class="image" style="background-image: url('https://avatars.githubusercontent.com/u/68747829?v=4');"></div>
+                <div class="image" style="background-image: url('https://avatars.githubusercontent.com/u/67014847?v=4');"></div>
+                <div class="image" style="background-image: url('https://avatars.githubusercontent.com/u/44602534?v=4');"></div>
+                <div class="image" style="background-image: url('https://scontent-mxp1-1.xx.fbcdn.net/v/t1.6435-9/84770528_4098785670147041_1773472509975330816_n.jpg?_nc_cat=105&ccb=1-3&_nc_sid=09cbfe&_nc_ohc=eAzsnp0l-NkAX8YsWgh&_nc_ht=scontent-mxp1-1.xx&oh=b6840b121c9b9f804f59e0b619fd5fd1&oe=60D4BA63');"></div>
+            </div>
+            <div style="margin: auto;">
+                <hr></hr>
+                <h1 class="title">42 WEBSERV by Pescara</h1>
+                <hr></hr>
+            </div>
+                <?php echo $ret; ?>
+        </div>
+    </body>
 </html>
